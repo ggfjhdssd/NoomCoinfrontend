@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NoomCoin • play & earn</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Pyidaungsu&display=swap" rel="stylesheet">
+    <style>
+/* ═══════════════════════════════════════
+   GLOBAL BASE
+═══════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Inter','Pyidaungsu',sans-serif;background:#0a0b0e;color:#fff;display:flex;justify-content:center;min-height:100vh;overflow-x:hidden;}
+.parallax-bg{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;overflow:hidden;pointer-events:none;}
+.glow-shape{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.6;animation:floatShape 20s infinite alternate ease-in-out;}
+.shape-1{width:300px;height:300px;background:rgba(255,215,0,0.15);top:-100px;left:-100px;}
+.shape-2{width:400px;height:400px;background:rgba(60,186,146,0.1);bottom:-150px;right:-100px;animation-delay:-5s;}
+.shape-3{width:250px;height:250px;background:rgba(255,165,0,0.12);top:40%;left:50%;animation-delay:-10s;}
+@keyframes floatShape{0%{transform:translate(0,0) scale(1);}50%{transform:translate(30px,-50px) scale(1.1);}100%{transform:translate(-40px,40px) scale(0.9);}}
+.container{width:100%;max-width:420px;padding:16px 12px 100px;position:relative;z-index:1;}
+.premium-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;background:rgba(20,22,27,0.6);backdrop-filter:blur(16px);padding:10px 16px;border-radius:30px;border:1px solid rgba(255,215,0,0.15);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.brand{display:flex;align-items:center;gap:10px;}
+.header-avatar{width:38px;height:38px;background:linear-gradient(145deg,#2a2a3c,#1a1a28);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid rgba(255,215,0,0.3);overflow:hidden;}
+.header-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.brand-text h4{font-size:15px;font-weight:700;background:linear-gradient(135deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.brand-text span{font-size:11px;color:#8e8e9d;display:block;}
+.glass-balance{background:linear-gradient(145deg,rgba(255,215,0,0.15),rgba(255,165,0,0.05));backdrop-filter:blur(12px);padding:7px 14px;border-radius:40px;border:1px solid rgba(255,215,0,0.4);display:flex;align-items:center;gap:6px;font-weight:700;font-size:17px;color:#ffd700;}
+/* ─── Page sections ─── */
+.page{display:none;animation:fadeIn 0.25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+/* ─── Nav ─── */
+.floating-nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:92%;max-width:380px;background:rgba(15,17,22,0.9);backdrop-filter:blur(20px);display:flex;justify-content:space-around;padding:10px;border-radius:30px;border:1px solid rgba(255,215,0,0.15);z-index:1000;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 14px;border-radius:20px;cursor:pointer;transition:all 0.3s;color:#5e5e71;font-size:10px;}
+.nav-item.active{background:rgba(255,215,0,0.12);color:#ffd700;}
+.nav-icon{font-size:20px;}
+/* ─── Home page ─── */
+.greeting-card{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,165,0,0.04));border:1px solid rgba(255,215,0,0.2);border-radius:20px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.greeting-left{flex:1;}
+.greeting-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.greeting-text{font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.username-badge{font-size:13px;color:#ffd700;margin-bottom:8px;}
+.animated-text-container{min-height:22px;position:relative;overflow:hidden;margin-top:4px;}
+.animated-line{font-size:12px;color:#8e8e9d;position:absolute;opacity:0;animation:slideText 9s infinite;}
+.animated-line:nth-child(2){animation-delay:3s;}
+.animated-line:nth-child(3){animation-delay:6s;}
+@keyframes slideText{0%{opacity:0;transform:translateY(10px);}8%{opacity:1;transform:translateY(0);}30%{opacity:1;transform:translateY(0);}38%{opacity:0;transform:translateY(-10px);}100%{opacity:0;}}
+.invite-box{background:rgba(255,215,0,0.08);border-radius:16px;padding:12px 16px;text-align:center;border:1px solid rgba(255,215,0,0.2);min-width:90px;}
+.small-text{font-size:11px;color:#8e8e9d;}
+.big-number{font-size:20px;font-weight:800;color:#ffd700;}
+.vip-toggle-row{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,140,0,0.04));border:1px solid rgba(255,215,0,0.2);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all 0.3s;}
+.vip-toggle-left{display:flex;align-items:center;gap:12px;}
+.vip-toggle-left .icon{font-size:24px;}
+.vip-toggle-left .label{font-size:14px;font-weight:700;color:#ffd700;}
+.vip-toggle-left .sublabel{font-size:11px;color:#8e8e9d;margin-top:2px;}
+.vip-status-text{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.06);}
+.vip-status-text.on{color:#3cba92;}
+.vip-status-text.off{color:#8e8e9d;}
+.vip-switch{position:relative;display:inline-block;width:44px;height:24px;}
+.vip-switch input{opacity:0;width:0;height:0;}
+.vip-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,0.1);border-radius:24px;transition:.4s;}
+.vip-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.4s;}
+input:checked+.vip-slider{background:linear-gradient(135deg,#ffd700,#ff8c00);}
+input:checked+.vip-slider:before{transform:translateX(20px);}
+.withdraw-home{width:100%;padding:14px;background:linear-gradient(135deg,#3cba92,#0ba360);border:none;border-radius:16px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:14px;font-family:inherit;}
+.task-card{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.1);border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;transition:all 0.3s;}
+.task-icon{font-size:24px;flex-shrink:0;}
+.task-info{flex:1;}
+.task-info h4{font-size:13px;font-weight:700;color:#e0e0f0;margin-bottom:3px;}
+.task-info p{font-size:11px;color:#8e8e9d;}
+.btn-modern{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:8px 14px;border-radius:30px;color:#121212;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity 0.2s;}
+.btn-modern:disabled{opacity:0.4;cursor:not-allowed;}
+.reset-task-section{background:rgba(20,22,27,0.6);border:1px solid rgba(255,215,0,0.1);border-radius:14px;padding:12px 14px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;}
+.reset-task-btn{background:linear-gradient(135deg,#667eea,#764ba2);border:none;padding:8px 16px;border-radius:30px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+/* ─── Earn page ─── */
+.vip-auto-banner{background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,140,0,0.08));border:1px solid rgba(255,215,0,0.35);border-radius:14px;padding:10px 14px;margin-bottom:12px;display:none;align-items:center;gap:10px;}
+.vip-auto-banner.show{display:flex;}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 8px rgba(255,215,0,0.15);}50%{box-shadow:0 0 20px rgba(255,215,0,0.4);}}
+.auto-progress{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.15);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:none;}
+.auto-progress.show{display:block;}
+.auto-progress h4{font-size:12px;color:#ffd700;margin-bottom:8px;}
+.auto-step{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:#8e8e9d;}
+.auto-step .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);flex-shrink:0;}
+.auto-step.active .dot{background:#ffd700;animation:blink 0.8s infinite;}
+.auto-step.done .dot{background:#3cba92;}
+.auto-step.done{color:#3cba92;}
+.auto-step.active{color:#ffd700;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.earn-section-title{font-size:16px;font-weight:700;color:#ffd700;margin-bottom:12px;}
+.tasks-grid{display:flex;flex-direction:column;gap:10px;}
+.earn-task-card{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.12);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:all 0.3s;}
+.earn-task-card.vip-active{border-color:rgba(255,215,0,0.4);background:rgba(255,215,0,0.05);}
+.etask-top{display:flex;align-items:center;gap:12px;}
+.etask-icon{font-size:28px;}
+.etask-info{flex:1;}
+.etask-reward{font-size:16px;font-weight:700;color:#ffd700;}
+.etask-status{font-size:11px;color:#8e8e9d;margin-top:2px;}
+.etask-counter{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);}
+.etask-counter.full{color:#3cba92;border-color:#3cba92;}
+.etask-counter.partial{color:#ffd700;border-color:#ffd700;}
+.etask-counter.empty{color:#8e8e9d;}
+.progress-bar{height:4px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#ffd700,#ff8c00);border-radius:4px;transition:width 0.4s;}
+.task-btn{border:none;padding:8px 16px;border-radius:30px;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:inherit;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#121212;}
+.task-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.task-btn.watching{background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid rgba(255,215,0,0.3);}
+.task-btn.auto-mode{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;animation:pulseGlow 1.5s infinite;}
+.earn-invite-btn{width:100%;padding:14px;background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,165,0,0.08));border:1px solid rgba(255,215,0,0.3);border-radius:16px;color:#ffd700;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;font-family:inherit;}
+.earn-footer{text-align:center;font-size:11px;color:#5e5e71;margin-top:12px;line-height:1.6;}
+/* ─── Games page ─── */
+.games-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.game-card{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.1);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;transition:all 0.3s;}
+.game-card:active{transform:scale(0.96);}
+.game-card .gc-icon{font-size:40px;margin-bottom:8px;}
+.game-card h3{font-size:13px;font-weight:700;color:#e0e0f0;margin-bottom:4px;}
+.game-card p{font-size:11px;color:#8e8e9d;}
+.game-card .badge{display:inline-block;background:rgba(255,215,0,0.15);color:#ffd700;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:6px;}
+/* ─── Lucky Wheel (in Games) ─── */
+.lw-wrap{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.15);border-radius:20px;padding:16px;margin-bottom:12px;}
+.wheel-container{position:relative;width:260px;height:260px;margin:0 auto 16px;}
+.wheel{width:100%;height:100%;border-radius:50%;position:relative;background:conic-gradient(
+    #ffd700 0deg 45deg,#ff8c00 45deg 90deg,#ff6b6b 90deg 135deg,
+    #4ecdc4 135deg 180deg,#a8e6cf 180deg 225deg,#ffd3b6 225deg 270deg,
+    #ffaaa5 270deg 315deg,#ff8b94 315deg 360deg);
+border:8px solid #222;box-shadow:0 0 30px rgba(255,215,0,0.3);
+transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
+.wheel-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;display:grid;grid-template-columns:1fr 1fr;text-align:center;pointer-events:none;}
+.wl{font-size:9px;font-weight:700;color:#121212;padding:2px;}
+.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;background:linear-gradient(135deg,#ffd700,#ff8c00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:4px solid #121212;z-index:5;}
+.wheel-pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:36px;color:#ffd700;filter:drop-shadow(0 0 10px gold);z-index:10;}
+.spin-btn{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:14px 32px;border-radius:50px;color:#121212;font-weight:700;font-size:16px;cursor:pointer;font-family:inherit;width:100%;}
+.spin-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.ticket-info{text-align:center;margin-top:8px;font-size:13px;color:#ffd700;font-weight:700;}
+.invite-tab-btn{width:100%;padding:12px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:14px;color:#ffd700;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;}
+.lw-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.lw-tab{flex:1;padding:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;text-align:center;font-size:12px;color:#8e8e9d;cursor:pointer;}
+.lw-tab.active{background:rgba(255,215,0,0.12);border-color:rgba(255,215,0,0.3);color:#ffd700;font-weight:700;}
+.lw-panel{display:none;}
+.lw-panel.active{display:block;}
+.invite-status-box{background:rgba(20,22,27,0.6);border:1px solid rgba(255,215,0,0.15);border-radius:14px;padding:14px;text-align:center;margin-bottom:10px;}
+.invite-progress-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden;margin:10px 0;}
+.invite-progress-fill{height:100%;background:linear-gradient(90deg,#ffd700,#ff8c00);border-radius:6px;transition:width 0.5s;}
+.claim-ref-btn{width:100%;padding:12px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:14px;color:#121212;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+.claim-ref-btn:disabled{opacity:0.35;cursor:not-allowed;}
+/* ─── Profile page ─── */
+.profile-card{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.12);border-radius:20px;padding:24px 20px;text-align:center;margin-bottom:16px;}
+.avatar-large{width:80px;height:80px;border-radius:50%;background:linear-gradient(145deg,#2a2a3c,#1a1a28);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 12px;border:3px solid rgba(255,215,0,0.3);overflow:hidden;}
+.avatar-large img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.stat-item{background:rgba(255,255,255,0.04);border-radius:12px;padding:12px;text-align:center;}
+.stat-item span{font-size:11px;color:#8e8e9d;display:block;margin-bottom:4px;}
+.stat-item b{font-size:18px;color:#ffd700;}
+/* ─── VPN Gate ─── */
+.vpn-page{display:none;position:fixed;inset:0;background:#05070a;z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.vpn-page.active{display:flex;}
+.vpn-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,215,0,0.15);border-radius:24px;padding:32px 24px;text-align:center;max-width:340px;width:100%;}
+.vpn-icon{font-size:60px;margin-bottom:16px;}
+.vpn-btn{width:100%;padding:14px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:16px;color:#121212;font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;font-family:inherit;}
+.location-text{font-size:14px;color:#8e8e9d;margin-top:8px;}
+/* ─── Modal ─── */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:flex-end;justify-content:center;}
+.modal.active{display:flex;}
+.modal-content{background:linear-gradient(145deg,#16181f,#0d0e13);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:420px;border-top:1px solid rgba(255,215,0,0.2);}
+.modal-title{font-size:18px;font-weight:700;color:#ffd700;margin-bottom:16px;}
+.method-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+.method-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.3s;}
+.method-btn.selected{border-color:#ffd700;background:rgba(255,215,0,0.1);}
+.method-btn img{height:28px;object-fit:contain;margin-bottom:4px;}
+.method-btn span{font-size:10px;color:#8e8e9d;display:block;}
+.form-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;color:#fff;font-size:14px;margin-bottom:12px;font-family:inherit;}
+.form-input:focus{outline:none;border-color:rgba(255,215,0,0.4);}
+.submit-btn{width:100%;padding:14px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:16px;color:#121212;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.close-modal-btn{background:rgba(255,255,255,0.05);border:none;color:#8e8e9d;padding:8px 16px;border-radius:30px;cursor:pointer;font-family:inherit;margin-bottom:12px;}
+/* ─── VIP Modal ─── */
+.vip-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:2001;align-items:flex-end;justify-content:center;}
+.vip-modal.active{display:flex;}
+.vip-modal-content{background:linear-gradient(145deg,#16181f,#0d0e13);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:420px;border-top:2px solid rgba(255,215,0,0.4);}
+/* ─── Alert ─── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;}
+.overlay.active{display:block;}
+.custom-alert{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(145deg,#16181f,#0d0e13);border:1px solid rgba(255,215,0,0.3);border-radius:20px;padding:24px;text-align:center;z-index:3001;min-width:280px;max-width:340px;}
+.custom-alert.active{display:block;}
+.alert-title{font-size:18px;font-weight:700;color:#ffd700;margin-bottom:8px;}
+.alert-message{font-size:14px;color:#8e8e9d;margin-bottom:16px;}
+.alert-btn{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:10px 28px;border-radius:30px;color:#121212;font-weight:700;cursor:pointer;font-family:inherit;}
+/* ─── Toast ─── */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(20,22,27,0.95);border:1px solid rgba(255,215,0,0.3);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;pointer-events:none;transition:opacity 0.3s;z-index:5000;white-space:nowrap;}
+.toast.show{opacity:1;}
+    </style>
+</head>
+<body>
+<!-- VPN Gate (shown before app if VPN required) -->
+<div class="vpn-page" id="vpnPage">
+    <div class="vpn-card">
+        <div class="vpn-icon" id="vpnIcon">🔒</div>
+        <h2 style="color:#ffd700;margin-bottom:8px;">Security Check</h2>
+        <p style="color:#8e8e9d;font-size:13px;margin-bottom:4px;">PayCoinAds ကိုသုံးရန်<br><b style="color:#fff;">Singapore</b> သို့မဟုတ် <b style="color:#fff;">United States VPN</b> ချိတ်ဆက်ထားပါ</p>
+        <div class="location-text" id="vpnLocationText">စစ်ဆေးနေသည်...</div>
+        <button class="vpn-btn" id="vpnCheckBtn" onclick="NC.vpn.check()">🔍 စစ်ဆေးပါ</button>
+    </div>
+</div>
+
+<!-- Parallax BG -->
+<div class="parallax-bg">
+    <div class="glow-shape shape-1"></div>
+    <div class="glow-shape shape-2"></div>
+    <div class="glow-shape shape-3"></div>
+</div>
+
+<!-- Main App -->
+<div class="container" id="appContainer" style="display:none;">
+    <!-- Header -->
+    <div class="premium-header">
+        <div class="brand">
+            <div class="header-avatar" id="headerAvatar"></div>
+            <div class="brand-text">
+                <h4>NoomCoin</h4>
+                <span>play & earn</span>
+            </div>
+        </div>
+        <div class="glass-balance">
+            <span id="coinSymbolLeft">🪙</span>
+            <span id="totalCoins">0</span>
+            <span id="coinSymbolRight" style="display:none;">ကျပ်</span>
+        </div>
+    </div>
+
+    <!-- ══════ HOME PAGE ══════ -->
+    <div class="page active" id="homePage">
+        <div class="greeting-card" id="inviteBox">
+            <div class="greeting-left">
+                <div class="greeting-row">
+                    <span class="greeting-text">မင်္ဂလာပါ</span>
+                    <span>🖐️</span>
+                </div>
+                <div class="username-badge" id="welcomeUsername">@username</div>
+                <div class="animated-text-container">
+                    <div class="animated-line">NoomCoin မှ ကြိုဆိုပါတယ် ✨</div>
+                    <div class="animated-line">ငွေထုတ်ရန် ခလုတ်ကို နှိပ်ပါ 💳</div>
+                    <div class="animated-line">နေ့စဉ် Check-in လုပ်ပါ 🔥</div>
+                </div>
+            </div>
+            <div class="invite-box">
+                <div class="small-text">သူငယ်ချင်းများကို</div>
+                <div class="big-number">ဖိတ်<span>ပြီး</span></div>
+                <div class="small-text" id="inviteRewardText">50🪙 ရယူပါ</div>
+            </div>
+        </div>
+
+        <div class="vip-toggle-row" id="vipToggleRow" onclick="NC.home.handleVipToggle()" style="visibility:hidden;">
+            <div class="vip-toggle-left">
+                <div class="icon">👑</div>
+                <div>
+                    <div class="label">VIP Mode</div>
+                    <div class="sublabel" id="vipSubLabel">VIP မဝယ်ရသေးပါ</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span class="vip-status-text off" id="vipStatusText">OFF</span>
+                <label class="vip-switch" onclick="event.stopPropagation();">
+                    <input type="checkbox" id="vipToggleCheck" onchange="NC.home.handleVipToggle()">
+                    <span class="vip-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <button class="withdraw-home" id="homeWithdrawBtn">💳 WITHDRAWAL MONEY (ပိုက်ဆံထုတ်ရန်)</button>
+
+        <div class="task-card">
+            <div class="task-icon">🔥</div>
+            <div class="task-info"><h4 id="dailyCheckinLabel">Daily Check-in</h4><p id="dailyCheckinRewardLabel">+24 coins (Watch Ad)</p></div>
+            <button class="btn-modern" id="dailyBtn">Check-in</button>
+        </div>
+        <div class="task-card"><div class="task-icon">🪙</div><div class="task-info"><h4 id="task1Label">Task 1</h4><p id="task1RewardLabel">+45 coins (Watch Ad)</p></div><button class="btn-modern" id="task1Btn" data-id="task1">Get +45</button></div>
+        <div class="task-card"><div class="task-icon">🪙</div><div class="task-info"><h4 id="task2Label">Task 2</h4><p id="task2RewardLabel">+45 coins (Watch Ad)</p></div><button class="btn-modern" id="task2Btn" data-id="task2">Get +45</button></div>
+        <div class="task-card"><div class="task-icon">🪙</div><div class="task-info"><h4 id="task3Label">Task 3</h4><p id="task3RewardLabel">+45 coins (Watch Ad)</p></div><button class="btn-modern" id="task3Btn" data-id="task3">Get +45</button></div>
+        <div class="task-card"><div class="task-icon">🪙</div><div class="task-info"><h4 id="task4Label">Task 4</h4><p id="task4RewardLabel">+45 coins (Watch Ad)</p></div><button class="btn-modern" id="task4Btn" data-id="task4">Get +45</button></div>
+
+        <div class="reset-task-section" id="resetTaskSection" style="display:none;">
+            <div><h4 style="font-size:13px;color:#e0e0f0;">🔄 Reset Task</h4><p id="resetTaskSubText" style="font-size:11px;color:#8e8e9d;margin-top:2px;">Home + Earn task အားလုံး ပြန်စသည်</p></div>
+            <button class="reset-task-btn" id="resetTaskBtn" onclick="NC.home.handleResetTask()">Reset</button>
+        </div>
+    </div>
+
+    <!-- ══════ EARN PAGE ══════ -->
+    <div class="page" id="earnPage">
+        <div class="vip-auto-banner" id="vipAutoBanner">
+            <div class="vab-icon">🤖</div>
+            <div class="vab-text">
+                <h4>Auto Watch Mode</h4>
+                <p>VIP Auto ကြည့်နေသည်...</p>
+            </div>
+            <button class="vip-stop-btn" onclick="NC.earn.stopAutoWatch()">⏹ Stop</button>
+        </div>
+        <div class="auto-progress" id="autoProgress">
+            <h4>⚡ Auto Watch Progress</h4>
+            <div class="auto-step" id="autoStep1"><div class="dot"></div>Ad ဖွင့်နေသည်...</div>
+            <div class="auto-step" id="autoStep2"><div class="dot"></div>28 စက္ကန့် ကြည့်နေသည်...</div>
+            <div class="auto-step" id="autoStep3"><div class="dot"></div>Reward လက်ခံနေသည်...</div>
+        </div>
+        <div class="earn-section-title">💰 Watch & Earn</div>
+        <div class="tasks-grid" id="tasksGrid"></div>
+        <button class="earn-invite-btn" onclick="NC.shareInvite()">👥 သူငယ်ချင်းများကိုဖိတ်ပြီး 50🪙 ရယူလိုက်ပါ</button>
+        <div class="earn-footer">Task တစ်ခုကို 4 ကြိုင်ကြည့်ရသည် • ကြည့်ပြီး 1 မိနစ်ကြာ ဆက်ကြည့်ရသည် • 4/4 ဖြစ်ရင် 10 မိနစ်နောက် ပြန်စသည်</div>
+    </div>
+
+    <!-- ══════ GAMES PAGE ══════ -->
+    <div class="page" id="gamesPage">
+        <div style="font-size:16px;font-weight:700;color:#ffd700;margin-bottom:14px;">🎮 Games</div>
+        <div class="games-grid">
+            <div class="game-card" onclick="NC.games.openLuckyWheel()">
+                <div class="gc-icon">🎰</div>
+                <h3>Lucky Wheel</h3>
+                <p>Spin & Win Coins</p>
+                <div class="badge">🎟️ Free Spins</div>
+            </div>
+            <div class="game-card" onclick="NC.games.openCoinClicker()">
+                <div class="gc-icon">🪙</div>
+                <h3>Coin Clicker</h3>
+                <p>Tap to Earn</p>
+                <div class="badge">⚡ Instant</div>
+            </div>
+        </div>
+        <!-- Lucky Wheel Panel -->
+        <div class="lw-wrap" id="lwWrap" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-size:14px;font-weight:700;color:#ffd700;">🎰 Lucky Wheel</div>
+                <button onclick="NC.games.closeLuckyWheel()" style="background:rgba(255,255,255,0.06);border:none;color:#8e8e9d;padding:4px 12px;border-radius:20px;cursor:pointer;font-family:inherit;">✕ Back</button>
+            </div>
+            <div class="lw-tabs">
+                <div class="lw-tab active" id="lwTabSpin" onclick="NC.games.lw.showTab('spin')">🎰 Spin</div>
+                <div class="lw-tab" id="lwTabAd" onclick="NC.games.lw.showTab('ad')">📺 Watch Ad</div>
+                <div class="lw-tab" id="lwTabInvite" onclick="NC.games.lw.showTab('invite')">👥 Invite</div>
+            </div>
+            <!-- Spin Panel -->
+            <div class="lw-panel active" id="lwPanelSpin">
+                <div class="wheel-container">
+                    <div class="wheel-pointer">▼</div>
+                    <div class="wheel" id="lwWheel">
+                        <div class="wheel-label">
+                            <div class="wl">200</div><div class="wl">20</div>
+                            <div class="wl">15</div><div class="wl">Again</div>
+                            <div class="wl">Free</div><div class="wl">100</div>
+                            <div class="wl">50</div><div class="wl">30</div>
+                        </div>
+                        <div class="wheel-center">🪙</div>
+                    </div>
+                </div>
+                <button class="spin-btn" id="lwSpinBtn" onclick="NC.games.lw.spin()">🎰 Spin</button>
+                <div class="ticket-info" id="lwTicketInfo">🎟️ Tickets: 0</div>
+            </div>
+            <!-- Ad Panel -->
+            <div class="lw-panel" id="lwPanelAd">
+                <div class="invite-status-box">
+                    <div style="font-size:13px;color:#e0e0f0;margin-bottom:6px;">📺 Ad ၅ ခုကြည့်ပြီး Ticket ၁ ခုရမည်</div>
+                    <div id="lwAdCount" style="font-size:22px;font-weight:700;color:#ffd700;">0 / 5</div>
+                    <div class="invite-progress-bar"><div class="invite-progress-fill" id="lwAdProgress" style="width:0%"></div></div>
+                    <div id="lwAdMsg" style="font-size:12px;color:#8e8e9d;"></div>
+                </div>
+                <button class="claim-ref-btn" id="lwAdClaimBtn" onclick="NC.games.lw.claimAdTicket()" disabled>🎟️ Ticket ယူပါ</button>
+                <button class="invite-tab-btn" onclick="NC.games.lw.watchAd()" style="margin-top:8px;">📺 Ad ကြည့်မည်</button>
+            </div>
+            <!-- Invite Panel -->
+            <div class="lw-panel" id="lwPanelInvite">
+                <div class="invite-status-box">
+                    <div style="font-size:13px;color:#e0e0f0;margin-bottom:6px;">👥 သူငယ်ချင်း ၅ ယောက်ဖိတ်ပြီး Ticket ၁ ခုရမည်</div>
+                    <div id="lwInviteCount" style="font-size:22px;font-weight:700;color:#ffd700;">0 / 5</div>
+                    <div class="invite-progress-bar"><div class="invite-progress-fill" id="lwInviteProgress" style="width:0%"></div></div>
+                    <div id="lwInviteMsg" style="font-size:12px;color:#8e8e9d;"></div>
+                </div>
+                <button class="claim-ref-btn" id="lwRefClaimBtn" onclick="NC.games.lw.claimRefTicket()" disabled>🎟️ Ticket ယူပါ</button>
+                <button class="invite-tab-btn" onclick="NC.shareInvite()">👥 သူငယ်ချင်းများဖိတ်ရန်</button>
+            </div>
+        </div>
+        <button class="earn-invite-btn" onclick="NC.shareInvite()" style="margin-top:8px;">👥 သူငယ်ချင်းများကိုဖိတ်ပြီး 50🪙 ရယူလိုက်ပါ</button>
+    </div>
+
+    <!-- ══════ PROFILE PAGE ══════ -->
+    <div class="page" id="profilePage">
+        <div class="profile-card">
+            <div class="avatar-large" id="profileAvatar"></div>
+            <h2 id="profileUsername" style="font-weight:700;margin-bottom:4px;">@username</h2>
+            <div class="stats-grid">
+                <div class="stat-item"><span>လက်ကျန်ငွေ</span><b id="profileCoins">0</b><span id="profileCoinSymbol" style="font-size:14px;color:#ffd700;">🪙</span></div>
+                <div class="stat-item"><span>ဖိတ်ခေါ်မှု</span><b id="referralCount">0</b></div>
+            </div>
+            <p style="margin-top:12px;font-size:12px;color:#5e5e71;">Joined: <span id="joinDate">-</span></p>
+        </div>
+        <button class="withdraw-home" id="profileWithdrawBtn">💳 ပိုက်ဆံထုတ်ရန်</button>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="floating-nav">
+        <div class="nav-item active" data-page="home"><div class="nav-icon">🏠</div><span>Home</span></div>
+        <div class="nav-item" data-page="earn"><div class="nav-icon">💰</div><span>Earn</span></div>
+        <div class="nav-item" data-page="games"><div class="nav-icon">🎮</div><span>Games</span></div>
+        <div class="nav-item" data-page="profile"><div class="nav-icon">👤</div><span>Profile</span></div>
+    </nav>
+</div>
+
+<!-- Withdrawal Modal -->
+<div class="modal" id="withdrawModal">
+    <div class="modal-content">
+        <button class="close-modal-btn" id="closeModal">✕ ပိတ်ရန်</button>
+        <div class="modal-title">💳 ပိုက်ဆံထုတ်ရန်</div>
+        <div class="method-grid">
+            <div class="method-btn" data-method="kpay">
+                <img src="https://raw.githubusercontent.com/ggfjhdssd/noomcoin-telegram-app/main/public/images/images.jpeg" alt="KPay">
+                <span>KBZ Pay</span>
+            </div>
+            <div class="method-btn" data-method="wavepay">
+                <img src="https://raw.githubusercontent.com/ggfjhdssd/noomcoin-telegram-app/main/public/images/images%20(2).jpeg" alt="WavePay">
+                <span>Wave Pay</span>
+            </div>
+            <div class="method-btn" data-method="binance">
+                <img src="https://raw.githubusercontent.com/ggfjhdssd/noomcoin-telegram-app/main/public/images/images%20(3).jpeg" alt="Binance">
+                <span>Binance</span>
+            </div>
+        </div>
+        <input class="form-input" id="phoneInput" placeholder="ဖုန်းနံပါတ် သို့မဟုတ် Wallet Address" type="text">
+        <input class="form-input" id="amountInput" placeholder="ထုတ်မည့် ပမာဏ (coins)" type="number">
+        <input class="form-input" id="accountNameInput" placeholder="အကောင့်အမည်" type="text">
+        <button class="submit-btn" onclick="NC.submitWithdrawal()">💸 ထုတ်ရန်တောင်းဆိုပါ</button>
+    </div>
+</div>
+
+<!-- VIP Modal -->
+<div class="vip-modal" id="vipPurchaseModal">
+    <div class="vip-modal-content">
+        <div style="font-size:18px;font-weight:700;color:#ffd700;margin-bottom:12px;">👑 VIP Mode ဝယ်ယူပါ</div>
+        <div style="font-size:13px;color:#8e8e9d;margin-bottom:16px;">VIP ဖြင့် Auto Watch + Reset ကန့်သတ်ချက် မရှိဘဲ သုံးနိုင်သည်</div>
+        <input class="form-input" id="vipScreenshotInput" placeholder="Payment Screenshot URL (optional)" type="text">
+        <button class="submit-btn" onclick="NC.home.submitVipPurchase()" style="margin-bottom:8px;">💎 VIP ဝယ်မည်</button>
+        <button class="close-modal-btn" style="width:100%;text-align:center;" onclick="NC.home.closeVipModal()">ပိတ်ရန်</button>
+    </div>
+</div>
+
+<!-- Alert -->
+<div class="overlay" id="alertOverlay" onclick="NC.closeAlert()"></div>
+<div class="custom-alert" id="customAlert">
+    <div class="alert-title" id="alertTitle"></div>
+    <div class="alert-message" id="alertMessage"></div>
+    <button class="alert-btn" onclick="NC.closeAlert()">OK</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  NoomCoin SPA — All pages in one file
+//  Namespace: window.NC
+// ═══════════════════════════════════════════════════════════════
+const NC = (() => {
+'use strict';
+
+const API  = '/api';
+const tg   = window.Telegram?.WebApp;
+if (tg) { tg.expand(); tg.ready(); }
+const initData = tg?.initData || '';
+const headers  = { 'Content-Type':'application/json', 'X-Telegram-Init-Data': initData };
+
+let _user = null;
+let _cfg  = {};
+
+// ─── Toast ───────────────────────────────────────────────────
+function toast(msg, dur=2500) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ─── Alert ───────────────────────────────────────────────────
+function showAlert(title, msg) {
+    document.getElementById('alertTitle').textContent = title;
+    document.getElementById('alertMessage').textContent = msg;
+    document.getElementById('alertOverlay').classList.add('active');
+    document.getElementById('customAlert').classList.add('active');
+}
+function closeAlert() {
+    document.getElementById('alertOverlay').classList.remove('active');
+    document.getElementById('customAlert').classList.remove('active');
+}
+
+// ─── Navigation ──────────────────────────────────────────────
+const pages = ['home','earn','games','profile'];
+function goTo(pageId) {
+    pages.forEach(p => {
+        document.getElementById(p+'Page').classList.toggle('active', p === pageId);
+    });
+    document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.toggle('active', n.dataset.page === pageId);
+    });
+    if (pageId === 'earn')   earn._init();
+    if (pageId === 'games')  games.lw._refresh();
+    if (pageId === 'profile') _renderProfile();
+}
+document.querySelectorAll('.nav-item').forEach(n => {
+    n.addEventListener('click', () => goTo(n.dataset.page));
+});
+
+// ─── Avatar helper ───────────────────────────────────────────
+function setAvatar(elId, url) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (url) { el.innerHTML = `<img src="${url}" onerror="this.parentElement.textContent='👤'">`; }
+    else { el.textContent = '👤'; }
+}
+
+// ─── Fetch User ──────────────────────────────────────────────
+async function fetchUser() {
+    try {
+        const r = await fetch(`${API}/user`, { headers });
+        if (!r.ok) return;
+        _user = await r.json();
+        _renderHeader();
+    } catch(e) {}
+}
+
+function _renderHeader() {
+    if (!_user) return;
+    const sym = _cfg.CURRENCY_MODE === 'mmk' ? '' : '';
+    document.getElementById('totalCoins').textContent = (_user.coins||0).toLocaleString();
+    document.getElementById('welcomeUsername').textContent = '@' + (_user.username || _user.firstName || 'user');
+    setAvatar('headerAvatar', _user.photoUrl);
+    // Home task buttons state
+    _updateHomeTaskButtons();
+}
+
+function _renderProfile() {
+    if (!_user) return;
+    document.getElementById('profileUsername').textContent = '@' + (_user.username || _user.firstName || 'user');
+    document.getElementById('profileCoins').textContent = (_user.coins||0).toLocaleString();
+    document.getElementById('referralCount').textContent = _user.referralCount || 0;
+    if (_user.createdAt) {
+        document.getElementById('joinDate').textContent = new Date(_user.createdAt).toLocaleDateString();
+    }
+    setAvatar('profileAvatar', _user.photoUrl);
+}
+
+// ─── UI Config from Admin ─────────────────────────────────────
+async function fetchConfig() {
+    try {
+        const r = await fetch(`${API}/ui-config`);
+        if (!r.ok) return;
+        _cfg = await r.json();
+
+        // VIP card visibility
+        const vipRow = document.getElementById('vipToggleRow');
+        if (vipRow) {
+            vipRow.style.visibility = '';
+            vipRow.style.display = _cfg.VIP_CARD_VISIBLE === false ? 'none' : '';
+        }
+        // Currency
+        const isMmk = _cfg.CURRENCY_MODE === 'mmk';
+        document.getElementById('coinSymbolLeft').style.display  = isMmk ? 'none' : '';
+        document.getElementById('coinSymbolRight').style.display = isMmk ? '' : 'none';
+        document.getElementById('profileCoinSymbol').textContent  = isMmk ? 'ကျပ်' : '🪙';
+        const reward = _cfg.REFERRAL_REWARD || 50;
+        document.getElementById('inviteRewardText').textContent   = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
+
+        // Task labels
+        const s = (id,v) => { const e=document.getElementById(id); if(e&&v) e.textContent=v; };
+        s('dailyCheckinLabel',      _cfg.DAILY_CHECKIN_LABEL);
+        s('dailyCheckinRewardLabel',_cfg.DAILY_CHECKIN_REWARD_LABEL);
+        s('task1Label',_cfg.TASK1_LABEL); s('task1RewardLabel',_cfg.TASK1_REWARD_LABEL);
+        s('task2Label',_cfg.TASK2_LABEL); s('task2RewardLabel',_cfg.TASK2_REWARD_LABEL);
+        s('task3Label',_cfg.TASK3_LABEL); s('task3RewardLabel',_cfg.TASK3_REWARD_LABEL);
+        s('task4Label',_cfg.TASK4_LABEL); s('task4RewardLabel',_cfg.TASK4_REWARD_LABEL);
+        const b = (id,v) => { const e=document.getElementById(id); if(e&&v&&!e.disabled&&!e.textContent.includes('⏳')&&!e.textContent.includes('✅')) e.textContent=v; };
+        b('task1Btn',_cfg.TASK1_BTN_LABEL); b('task2Btn',_cfg.TASK2_BTN_LABEL);
+        b('task3Btn',_cfg.TASK3_BTN_LABEL); b('task4Btn',_cfg.TASK4_BTN_LABEL);
+
+    } catch(e) { console.error('config',e); }
+}
+
+// ─── VPN Gate ─────────────────────────────────────────────────
+const vpn = {
+    async init() {
+        if (_cfg.VPN_MODE === false) { this._allow(); return; }
+        document.getElementById('vpnPage').classList.add('active');
+        await this.check();
+    },
+    async check() {
+        const btn = document.getElementById('vpnCheckBtn');
+        const loc = document.getElementById('vpnLocationText');
+        btn.disabled = true;
+        loc.textContent = 'စစ်ဆေးနေသည်...';
+        try {
+            const r = await fetch(`${API}/check-vpn`, { headers });
+            const d = await r.json();
+            if (d.allowed) {
+                loc.textContent = d.isAdmin ? 'Admin Access 👑' : (d.countryCode==='US'?'United States ✅':'Singapore ✅');
+                document.getElementById('vpnIcon').textContent = '✅';
+                setTimeout(() => this._allow(), 1200);
+            } else {
+                loc.textContent = (d.country||'Unknown') + ' ❌';
+                document.getElementById('vpnIcon').textContent = '❌';
+                btn.disabled = false;
+                btn.textContent = '🔄 ထပ်စစ်ဆေးပါ';
+            }
+        } catch(e) { btn.disabled=false; loc.textContent='Error — ထပ်ကြိုးစားပါ'; }
+    },
+    _allow() {
+        document.getElementById('vpnPage').classList.remove('active');
+        document.getElementById('appContainer').style.display = '';
+    }
+};
+
+// ─── HOME module ──────────────────────────────────────────────
+const home = (() => {
+    let _homeTaskCooldowns = {};
+    let _dailyCooldown = 0;
+    let _adsgramHomeTask = null;
+
+    function _fmtTime(ms) {
+        if (ms<=0) return '0s';
+        const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);
+        if (h>0) return `${h}h ${m%60}m`;
+        if (m>0) return `${m}m ${s%60}s`;
+        return `${s}s`;
+    }
+
+    async function _loadState() {
+        if (!_user) return;
+        try {
+            const r = await fetch(`${API}/user/task-status`, { headers });
+            const d = await r.json();
+            if (d.success) {
+                _homeTaskCooldowns = {};
+                (d.tasks||[]).forEach(t => { _homeTaskCooldowns[t.id] = t.cooldownRemaining||0; });
+                _dailyCooldown = d.dailyCooldown||0;
+                _updateHomeTaskButtons();
+            }
+        } catch(e) {}
+    }
+
+    function _updateHomeTaskButtons() {
+        const btn = document.getElementById('dailyBtn');
+        if (btn) {
+            if (_dailyCooldown > 0) btn.textContent = `⏳ ${_fmtTime(_dailyCooldown)}`;
+            else { btn.textContent = 'Check-in'; btn.disabled = false; }
+        }
+        ['task1','task2','task3','task4'].forEach(id => {
+            const b = document.getElementById(id+'Btn');
+            if (!b) return;
+            const cd = _homeTaskCooldowns[id] || 0;
+            if (cd > 0) { b.textContent = `⏳ ${_fmtTime(cd)}`; b.disabled=true; }
+            else { b.disabled = false; }
+        });
+        // Reset task section
+        const anyDone = Object.values(_homeTaskCooldowns).some(v=>v>0) || _dailyCooldown>0;
+        document.getElementById('resetTaskSection').style.display = anyDone ? '' : 'none';
+    }
+
+    async function handleVipToggle() {
+        if (!_user) return;
+        const check = document.getElementById('vipToggleCheck');
+        const wantOn = check.checked;
+        if (wantOn && !_user.isVip) {
+            check.checked = false;
+            document.getElementById('vipPurchaseModal').classList.add('active');
+            return;
+        }
+        try {
+            const r = await fetch(`${API}/vip/toggle`, { method:'POST', headers, body: JSON.stringify({ enable: wantOn }) });
+            const d = await r.json();
+            if (d.success) { await fetchUser(); toast(wantOn ? '👑 VIP Mode ဖွင့်ပြီ' : 'VIP Mode ပိတ်ပြီ'); }
+        } catch(e) { toast('❌ Error'); }
+    }
+
+    async function submitVipPurchase() {
+        const screenshot = document.getElementById('vipScreenshotInput').value.trim();
+        try {
+            const r = await fetch(`${API}/vip/purchase`, { method:'POST', headers, body: JSON.stringify({ screenshot }) });
+            const d = await r.json();
+            if (d.success) { toast('✅ VIP တောင်းဆိုမှု ပို့ပြီ — Admin စစ်ဆေးမည်'); closeVipModal(); }
+            else toast('❌ ' + (d.error||'Error'));
+        } catch(e) { toast('❌ Error'); }
+    }
+    function closeVipModal() { document.getElementById('vipPurchaseModal').classList.remove('active'); }
+
+    async function handleResetTask() {
+        try {
+            const r = await fetch(`${API}/user/reset-tasks`, { method:'POST', headers });
+            const d = await r.json();
+            if (d.success) { toast('🔄 Tasks reset ပြီ'); await fetchUser(); _loadState(); }
+            else toast('❌ ' + (d.error||'Error'));
+        } catch(e) { toast('❌ Error'); }
+    }
+
+    // Daily check-in ad
+    async function _triggerDaily() {
+        try {
+            const AdController = await window.Adsgram?.init({ blockId: '4832' });
+            AdController.show().then(async () => {
+                const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers, body: JSON.stringify({ type:'daily' }) });
+                const d = await r.json();
+                if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
+            }).catch(()=>toast('❌ Ad မပြနိုင်ပါ'));
+        } catch(e) { toast('❌ Ad Error'); }
+    }
+
+    // Home task ad
+    async function _triggerTask(taskId) {
+        try {
+            const AdController = await window.Adsgram?.init({ blockId: '4832' });
+            AdController.show().then(async () => {
+                const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers, body: JSON.stringify({ type:'home_task', taskId }) });
+                const d = await r.json();
+                if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
+            }).catch(()=>toast('❌ Ad မပြနိုင်ပါ'));
+        } catch(e) { toast('❌ Ad Error'); }
+    }
+
+    function _bindEvents() {
+        document.getElementById('dailyBtn').addEventListener('click', _triggerDaily);
+        ['task1','task2','task3','task4'].forEach(id => {
+            document.getElementById(id+'Btn').addEventListener('click', () => _triggerTask(id));
+        });
+        document.getElementById('inviteBox').addEventListener('click', shareInvite);
+        document.getElementById('homeWithdrawBtn').addEventListener('click', openWithdrawModal);
+    }
+
+    async function init() {
+        _bindEvents();
+        await _loadState();
+        setInterval(_loadState, 30000);
+    }
+
+    return { init, handleVipToggle, submitVipPurchase, closeVipModal, handleResetTask };
+})();
+
+// ─── EARN module ──────────────────────────────────────────────
+const earn = (() => {
+    const TASKS = [
+        { id:'video1', icon:'🎥', name:'Video Task 1' },
+        { id:'video2', icon:'🎬', name:'Video Task 2' },
+        { id:'video3', icon:'📽️', name:'Video Task 3' },
+        { id:'video4', icon:'🎞️', name:'Video Task 4' },
+    ];
+    const VIP_SESSION = 'nc_vip_earn_active';
+    let _status = {};
+    let _activeTask = null;
+    let _autoWatching = false;
+    let _initialized = false;
+
+    function _fmtTime(ms) {
+        if (ms<=0) return '0s';
+        const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);
+        if (h>0) return `${h}h ${m%60}m`;
+        if (m>0) return `${m}m ${s%60}s`;
+        return `${s}s`;
+    }
+
+    function _render() {
+        const cfg = _cfg;
+        const watchTxt  = cfg.EARN_WATCH_LABEL || 'ကြည့်ရန် အသင့်';
+        const rewardLbl = cfg.EARN_REWARD_LABEL || '+45🪙';
+        const grid = document.getElementById('tasksGrid');
+        let html = '';
+        TASKS.forEach(task => {
+            const s = _status[task.id] || { currentCount:0, maxCount:4, reward:45, watchCooldownRemaining:0, dailyResetIn:0 };
+            const pct = (s.currentCount/s.maxCount)*100;
+            const full = s.currentCount >= s.maxCount;
+            const onCd = s.watchCooldownRemaining > 0;
+            const isAct = _activeTask === task.id;
+            const dis = full || onCd || (!!_activeTask && !isAct);
+            const rlbl = rewardLbl.replace(/\d+/, s.reward||45);
+            let statusTxt = full && s.dailyResetIn>0 ? `⏰ ${_fmtTime(s.dailyResetIn)} reset` : full ? '✅ ပြီးပါပြီ' : onCd ? `⏳ ${_fmtTime(s.watchCooldownRemaining)}` : watchTxt;
+            let btnTxt = isAct&&_autoWatching?'🤖 Auto...':isAct?'Watching...':full?'✅ Done':onCd?`⏳ ${_fmtTime(s.watchCooldownRemaining)}`:'Watch';
+            let btnCls = isAct&&_autoWatching?'task-btn auto-mode':isAct?'task-btn watching':'task-btn';
+            html += `<div class="earn-task-card${isAct&&_autoWatching?' vip-active':''}">
+                <div class="etask-top">
+                    <div class="etask-icon">${task.icon}</div>
+                    <div class="etask-info">
+                        <div class="etask-reward">${rlbl}</div>
+                        <div class="etask-status">${statusTxt}</div>
+                    </div>
+                    <div class="etask-counter ${full?'full':s.currentCount>0?'partial':'empty'}">${s.currentCount}/${s.maxCount}</div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                <button class="${btnCls}" id="earn-btn-${task.id}" data-id="${task.id}" ${dis?'disabled':''}>${btnTxt}</button>
+            </div>`;
+        });
+        grid.innerHTML = html;
+        TASKS.forEach(task => {
+            const btn = document.getElementById('earn-btn-'+task.id);
+            if (btn) btn.addEventListener('click', () => _watchTask(task.id));
+        });
+    }
+
+    async function _fetchStatus() {
+        try {
+            const r = await fetch(`${API}/earn/tasks/status`, { headers });
+            const d = await r.json();
+            if (d.success) { _status = d.tasks||{}; _render(); }
+        } catch(e) {}
+    }
+
+    async function _watchTask(taskId) {
+        if (_activeTask) return;
+        _activeTask = taskId;
+        _render();
+        try {
+            const AdController = await window.Adsgram?.init({ blockId: '5183' });
+            AdController.show().then(async () => {
+                const r = await fetch(`${API}/earn/video`, { method:'POST', headers, body: JSON.stringify({ taskId }) });
+                const d = await r.json();
+                if (d.success) { toast(`✅ +${d.reward}🪙`); await fetchUser(); }
+                _activeTask = null; _fetchStatus();
+            }).catch(()=>{ toast('❌ Ad မပြနိုင်ပါ'); _activeTask=null; _render(); });
+        } catch(e) { _activeTask=null; _render(); }
+    }
+
+    function stopAutoWatch() {
+        _autoWatching = false;
+        sessionStorage.removeItem(VIP_SESSION);
+        document.getElementById('vipAutoBanner').classList.remove('show');
+        document.getElementById('autoProgress').classList.remove('show');
+        _render();
+    }
+
+    async function _init() {
+        if (_initialized) { _fetchStatus(); return; }
+        _initialized = true;
+        await _fetchStatus();
+        setInterval(_fetchStatus, 30000);
+    }
+
+    return { _init, stopAutoWatch };
+})();
+
+// ─── GAMES module ─────────────────────────────────────────────
+const games = (() => {
+    function openLuckyWheel() {
+        document.getElementById('lwWrap').style.display = '';
+        lw._refresh();
+    }
+    function closeLuckyWheel() { document.getElementById('lwWrap').style.display = 'none'; }
+    function openCoinClicker() { toast('🪙 Coin Clicker — Coming Soon!'); }
+
+    // Lucky Wheel sub-module
+    const lw = (() => {
+        let _tickets = 0;
+        let _spinning = false;
+        let _deg = 0;
+        let _adCount = 0;
+        let _adCooldownEnd = 0;
+        let _claimableRef = 0;
+        let _refTotal = 0;
+        const PRIZES = [200,20,15,0,1,100,50,30]; // 0=try again, 1=free spin
+
+        function showTab(tab) {
+            ['spin','ad','invite'].forEach(t => {
+                document.getElementById('lwTab'+t[0].toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+                document.getElementById('lwPanel'+t[0].toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+            });
+        }
+
+        async function _refresh() {
+            if (!document.getElementById('lwWrap') || document.getElementById('lwWrap').style.display==='none') return;
+            try {
+                const r = await fetch(`${API}/games/wheel-status`, { headers });
+                const d = await r.json();
+                if (!d.success) return;
+                _tickets = d.spinTickets||0;
+                _adCount = d.adWatchCount||0;
+                _adCooldownEnd = d.adCooldownEndTime||0;
+                _claimableRef = d.claimableReferralTickets||0;
+                _refTotal = d.totalReferrals||0;
+                _updateUI();
+            } catch(e) {}
+        }
+
+        function _updateUI() {
+            document.getElementById('lwTicketInfo').textContent = `🎟️ Tickets: ${_tickets}`;
+            document.getElementById('lwSpinBtn').disabled = _tickets<=0 || _spinning;
+            // Ad panel
+            const adPct = Math.min(_adCount/5,1)*100;
+            document.getElementById('lwAdCount').textContent = `${Math.min(_adCount,5)} / 5`;
+            document.getElementById('lwAdProgress').style.width = adPct+'%';
+            const canClaim = _adCount>=5 && Date.now()>_adCooldownEnd;
+            document.getElementById('lwAdClaimBtn').disabled = !canClaim;
+            // Invite panel
+            const refForNext = Math.max(0, 5 - (_refTotal%5));
+            document.getElementById('lwInviteCount').textContent = `${_refTotal%5||(_claimableRef?5:0)} / 5`;
+            document.getElementById('lwInviteProgress').style.width = Math.min((_refTotal%5)/5,1)*100+'%';
+            document.getElementById('lwRefClaimBtn').disabled = _claimableRef<=0;
+            document.getElementById('lwInviteMsg').textContent = _claimableRef>0 ? `🎟️ ${_claimableRef} ticket claim လုပ်နိုင်ပြီ!` : `သူငယ်ချင်း ${refForNext} ယောက်ထပ်ဖိတ်ရင် ticket ရမည်`;
+        }
+
+        async function spin() {
+            if (_spinning || _tickets<=0) return;
+            _spinning = true;
+            document.getElementById('lwSpinBtn').disabled = true;
+            try {
+                const r = await fetch(`${API}/games/spin`, { method:'POST', headers });
+                const d = await r.json();
+                if (!d.success) { toast('❌ '+(d.error||'Error')); _spinning=false; return; }
+                const idx = d.prizeIndex ?? 0;
+                const offset = 22.5 + 90;
+                const currentMod = _deg % 360;
+                const target = 360 - (idx*45 + offset);
+                let delta = ((target-currentMod)%360+360)%360;
+                if (delta<45) delta+=360;
+                _deg += delta + 360*5;
+                document.getElementById('lwWheel').style.transform = `rotate(${_deg}deg)`;
+                setTimeout(() => {
+                    const prize = PRIZES[idx];
+                    if (prize===0) showAlert('😅 Try Again!','운이 없었습니다. 다시 도전!');
+                    else if (prize===1) showAlert('🎟️ Free Spin!',`+1 Free Ticket ရပြီ!`);
+                    else showAlert('🎉 Congratulations!',`${prize}🪙 ရပြီ!`);
+                    _spinning=false;
+                    _refresh();
+                    fetchUser();
+                }, 4200);
+            } catch(e) { toast('❌ Error'); _spinning=false; document.getElementById('lwSpinBtn').disabled=false; }
+        }
+
+        async function watchAd() {
+            try {
+                const AdController = await window.Adsgram?.init({ blockId:'5183' });
+                AdController.show().then(async()=>{
+                    const r = await fetch(`${API}/games/watch-ad`, { method:'POST', headers });
+                    const d = await r.json();
+                    toast(d.success ? '✅ Ad ကြည့်ပြီ!' : '❌ '+(d.error||'Error'));
+                    _refresh();
+                }).catch(()=>toast('❌ Ad မပြနိုင်ပါ'));
+            } catch(e) { toast('❌ Error'); }
+        }
+
+        async function claimAdTicket() {
+            try {
+                const r = await fetch(`${API}/games/claim-ticket`, { method:'POST', headers });
+                const d = await r.json();
+                toast(d.success ? '🎟️ Ticket ရပြီ!' : '❌ '+(d.error||'Error'));
+                _refresh();
+            } catch(e) { toast('❌ Error'); }
+        }
+
+        async function claimRefTicket() {
+            try {
+                const r = await fetch(`${API}/games/claim-referral-ticket`, { method:'POST', headers });
+                const d = await r.json();
+                toast(d.success ? '🎟️ Referral Ticket ရပြီ!' : '❌ '+(d.error||'Error'));
+                _refresh();
+            } catch(e) { toast('❌ Error'); }
+        }
+
+        return { showTab, spin, watchAd, claimAdTicket, claimRefTicket, _refresh };
+    })();
+
+    return { openLuckyWheel, closeLuckyWheel, openCoinClicker, lw };
+})();
+
+// ─── Withdrawal ───────────────────────────────────────────────
+let _selectedMethod = '';
+function openWithdrawModal() {
+    document.getElementById('withdrawModal').classList.add('active');
+}
+async function submitWithdrawal() {
+    if (!_selectedMethod) return toast('💳 Payment method ရွေးပါ');
+    const phone  = document.getElementById('phoneInput').value.trim();
+    const amount = document.getElementById('amountInput').value.trim();
+    const name   = document.getElementById('accountNameInput').value.trim();
+    if (!phone||!amount||!name) return toast('📝 အချက်အလက်ပြည့်ပြည့်ဖြည့်ပါ');
+    try {
+        const r = await fetch(`${API}/withdraw`, { method:'POST', headers, body: JSON.stringify({ method:_selectedMethod, phone, amount:parseFloat(amount), accountName:name }) });
+        const d = await r.json();
+        if (d.success) { toast('✅ ထုတ်ရန်တောင်းဆိုမှု ပို့ပြီ'); document.getElementById('withdrawModal').classList.remove('active'); }
+        else toast('❌ '+(d.error||'Error'));
+    } catch(e) { toast('❌ Error'); }
+}
+
+// ─── Invite / Share ───────────────────────────────────────────
+function shareInvite() {
+    if (!_user) return;
+    const txt = `ဖုန်းလေးပွတ်ရင်း အပိုဝင်ငွေ ရှာချင်သူများအတွက် NoomCoin 🐻 ကျွန်တော့်ရဲ့ Link ကနေ ဝင်ဆော့ရုံနဲ့ သင် 50🪙 ချက်ခြင်းရပြီး Coins တွေ စုပြီး ငွေထုတ်လို့ရပြီနော်! အခုပဲ စမ်းကြည့်လိုက်ပါ 👇`;
+    const url  = `https://t.me/NoomCoinMM_bot?start=${_user.userId||_user.id}`;
+    tg?.openTelegramLink?.(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(txt)}`);
+}
+
+// ─── Init ─────────────────────────────────────────────────────
+async function _init() {
+    // 1. Fetch config first (VPN mode, currency etc.)
+    await fetchConfig();
+
+    // 2. VPN gate check
+    await vpn.init();
+
+    // 3. Fetch user
+    await fetchUser();
+
+    // 4. Home module init
+    await home.init();
+
+    // 5. Withdrawal modal method buttons
+    document.querySelectorAll('.method-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.method-btn').forEach(b=>b.classList.remove('selected'));
+            btn.classList.add('selected');
+            _selectedMethod = btn.dataset.method;
+        });
+    });
+    document.getElementById('closeModal').addEventListener('click', () => {
+        document.getElementById('withdrawModal').classList.remove('active');
+    });
+    document.getElementById('profileWithdrawBtn').addEventListener('click', openWithdrawModal);
+
+    // 6. Refresh every minute
+    setInterval(fetchUser, 60000);
+}
+
+_init();
+
+return { goTo, home, earn, games, vpn, shareInvite, submitWithdrawal, closeAlert, showAlert };
+})();
+</script>
+</body>
+</html>
