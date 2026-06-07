@@ -591,7 +591,12 @@ async function fetchUser() {
 
 function _renderHeader() {
     if (!_user) return;
-    const sym = _cfg.CURRENCY_MODE === 'mmk' ? '' : '';
+    // Update coin symbols based on currency mode
+    const isMmk = _cfg.CURRENCY_MODE === 'mmk';
+    const symL = document.getElementById('coinSymbolLeft');
+    const symR = document.getElementById('coinSymbolRight');
+    if (symL) symL.style.display  = isMmk ? 'none' : '';
+    if (symR) symR.style.display  = isMmk ? '' : 'none';
     document.getElementById('totalCoins').textContent = (_user.coins||0).toLocaleString();
     document.getElementById('welcomeUsername').textContent = '@' + (_user.username || _user.firstName || 'user');
     setAvatar('headerAvatar', _user.photoUrl);
@@ -617,39 +622,72 @@ async function fetchConfig() {
         if (!r.ok) return;
         _cfg = await r.json();
 
-        // VIP card visibility
+        // Helper: treat both boolean false and string 'false' as false
+        const isFalse = v => v === false || v === 'false';
+        const isTrue  = v => v === true  || v === 'true';
+
+        // ── VIP card visibility ──
         const vipRow = document.getElementById('vipToggleRow');
         if (vipRow) {
             vipRow.style.visibility = '';
-            vipRow.style.display = _cfg.VIP_CARD_VISIBLE === false ? 'none' : '';
+            vipRow.style.display = isFalse(_cfg.VIP_CARD_VISIBLE) ? 'none' : '';
         }
-        // Currency
+
+        // ── Currency mode ──
         const isMmk = _cfg.CURRENCY_MODE === 'mmk';
-        document.getElementById('coinSymbolLeft').style.display  = isMmk ? 'none' : '';
-        document.getElementById('coinSymbolRight').style.display = isMmk ? '' : 'none';
-        document.getElementById('profileCoinSymbol').textContent  = isMmk ? 'ကျပ်' : '🪙';
+        const symLeft  = document.getElementById('coinSymbolLeft');
+        const symRight = document.getElementById('coinSymbolRight');
+        if (symLeft)  symLeft.style.display  = isMmk ? 'none' : '';
+        if (symRight) symRight.style.display = isMmk ? '' : 'none';
+        const profSym = document.getElementById('profileCoinSymbol');
+        if (profSym) profSym.textContent = isMmk ? 'ကျပ်' : '🪙';
         const reward = _cfg.REFERRAL_REWARD || 50;
-        document.getElementById('inviteRewardText').textContent   = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
+        const invTxt = document.getElementById('inviteRewardText');
+        if (invTxt) invTxt.textContent = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
 
-        // Task labels
-        const s = (id,v) => { const e=document.getElementById(id); if(e&&v) e.textContent=v; };
-        s('dailyCheckinLabel',      _cfg.DAILY_CHECKIN_LABEL);
-        s('dailyCheckinRewardLabel',_cfg.DAILY_CHECKIN_REWARD_LABEL);
-        s('task1Label',_cfg.TASK1_LABEL); s('task1RewardLabel',_cfg.TASK1_REWARD_LABEL);
-        s('task2Label',_cfg.TASK2_LABEL); s('task2RewardLabel',_cfg.TASK2_REWARD_LABEL);
-        s('task3Label',_cfg.TASK3_LABEL); s('task3RewardLabel',_cfg.TASK3_REWARD_LABEL);
-        s('task4Label',_cfg.TASK4_LABEL); s('task4RewardLabel',_cfg.TASK4_REWARD_LABEL);
-        const b = (id,v) => { const e=document.getElementById(id); if(e&&v&&!e.disabled&&!e.textContent.includes('⏳')&&!e.textContent.includes('✅')) e.textContent=v; };
-        b('task1Btn',_cfg.TASK1_BTN_LABEL); b('task2Btn',_cfg.TASK2_BTN_LABEL);
-        b('task3Btn',_cfg.TASK3_BTN_LABEL); b('task4Btn',_cfg.TASK4_BTN_LABEL);
+        // ── VPN mode (used in vpn.init) ──
+        // Already accessed via _cfg.VPN_MODE in vpn.init()
 
-    } catch(e) { console.error('config',e); }
+        // ── Home tab task labels ──
+        const s = (id, v) => { const e = document.getElementById(id); if (e && v != null && v !== '') e.textContent = v; };
+        s('dailyCheckinLabel',       _cfg.DAILY_CHECKIN_LABEL);
+        s('dailyCheckinRewardLabel', _cfg.DAILY_CHECKIN_REWARD_LABEL);
+        s('task1Label',      _cfg.TASK1_LABEL);
+        s('task1RewardLabel',_cfg.TASK1_REWARD_LABEL);
+        s('task2Label',      _cfg.TASK2_LABEL);
+        s('task2RewardLabel',_cfg.TASK2_REWARD_LABEL);
+        s('task3Label',      _cfg.TASK3_LABEL);
+        s('task3RewardLabel',_cfg.TASK3_REWARD_LABEL);
+        s('task4Label',      _cfg.TASK4_LABEL);
+        s('task4RewardLabel',_cfg.TASK4_REWARD_LABEL);
+
+        // ── Task button labels (only if not in countdown/done state) ──
+        const b = (id, v) => {
+            const e = document.getElementById(id);
+            if (e && v != null && v !== '' && !e.disabled
+                && !e.textContent.includes('⏳') && !e.textContent.includes('✅')) {
+                e.textContent = v;
+            }
+        };
+        b('task1Btn', _cfg.TASK1_BTN_LABEL);
+        b('task2Btn', _cfg.TASK2_BTN_LABEL);
+        b('task3Btn', _cfg.TASK3_BTN_LABEL);
+        b('task4Btn', _cfg.TASK4_BTN_LABEL);
+
+        console.log('✅ UI config loaded:', JSON.stringify({
+            VIP: _cfg.VIP_CARD_VISIBLE,
+            VPN: _cfg.VPN_MODE,
+            MMK: _cfg.CURRENCY_MODE
+        }));
+
+    } catch(e) { console.error('fetchConfig error:', e); }
 }
 
 // ─── VPN Gate ─────────────────────────────────────────────────
 const vpn = {
     async init() {
-        if (_cfg.VPN_MODE === false) { this._allow(); return; }
+        // Handle both boolean false and string 'false'
+        if (_cfg.VPN_MODE === false || _cfg.VPN_MODE === 'false') { this._allow(); return; }
         document.getElementById('vpnPage').classList.add('active');
         await this.check();
     },
