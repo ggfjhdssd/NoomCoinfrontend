@@ -457,6 +457,7 @@ input:checked+.vip-slider:before{transform:translateX(20px);}
         </div>
         <input class="form-input" id="phoneInput" placeholder="ဖုန်းနံပါတ် သို့မဟုတ် Wallet Address" type="text">
         <input class="form-input" id="amountInput" placeholder="ထုတ်မည့် ပမာဏ (coins)" type="number">
+        <p id="minWithdrawHint" style="font-size:11px;color:#ffd700;margin:-8px 0 10px;text-align:center;"></p>
         <input class="form-input" id="accountNameInput" placeholder="အကောင့်အမည်" type="text">
         <button class="submit-btn" onclick="NC.submitWithdrawal()">💸 ထုတ်ရန်တောင်းဆိုပါ</button>
     </div>
@@ -549,6 +550,18 @@ function setAvatar(elId, url) {
 async function fetchUser() {
     try {
         const r = await fetch(`${API}/user`, { headers });
+        if (r.status === 503) {
+            // Maintenance mode
+            const d = await r.json();
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('vpnPage').classList.add('active');
+            document.getElementById('vpnIcon').textContent = '🔧';
+            document.querySelector('#vpnPage h2').textContent = '🔧 Maintenance';
+            document.querySelector('#vpnPage p').innerHTML = d.error || 'ဆာဗာကို ပြင်ဆင်နေသည်။ ခဏစောင့်ပါ။';
+            document.getElementById('vpnLocationText').textContent = '';
+            document.getElementById('vpnCheckBtn').style.display = 'none';
+            return;
+        }
         if (!r.ok) return;
         const prev = _user;
         _user = await r.json();
@@ -563,18 +576,24 @@ async function fetchUser() {
 
 function _renderHeader() {
     if (!_user) return;
-    const sym = _cfg.CURRENCY_MODE === 'mmk' ? '' : '';
-    document.getElementById('totalCoins').textContent = (_user.coins||0).toLocaleString();
+    const isMmk = _cfg.CURRENCY_MODE === 'mmk';
+    const coins = (_user.coins||0).toLocaleString();
+    document.getElementById('totalCoins').textContent = coins;
     document.getElementById('welcomeUsername').textContent = '@' + (_user.username || _user.firstName || 'user');
     setAvatar('headerAvatar', _user.photoUrl);
+    // Currency symbols
+    document.getElementById('coinSymbolLeft').style.display  = isMmk ? 'none' : '';
+    document.getElementById('coinSymbolRight').style.display = isMmk ? '' : 'none';
     // Home task buttons state
     _updateHomeTaskButtons();
 }
 
 function _renderProfile() {
     if (!_user) return;
+    const isMmk = _cfg.CURRENCY_MODE === 'mmk';
     document.getElementById('profileUsername').textContent = '@' + (_user.username || _user.firstName || 'user');
     document.getElementById('profileCoins').textContent = (_user.coins||0).toLocaleString();
+    document.getElementById('profileCoinSymbol').textContent = isMmk ? 'ကျပ်' : '🪙';
     document.getElementById('referralCount').textContent = _user.referralCount || 0;
     if (_user.createdAt) {
         document.getElementById('joinDate').textContent = new Date(_user.createdAt).toLocaleDateString();
@@ -589,31 +608,55 @@ async function fetchConfig() {
         if (!r.ok) return;
         _cfg = await r.json();
 
+        const isMmk = _cfg.CURRENCY_MODE === 'mmk';
+        const vipVisible = _cfg.VIP_CARD_VISIBLE !== false && _cfg.VIP_CARD_VISIBLE !== 'false';
+
         // VIP card visibility
         const vipRow = document.getElementById('vipToggleRow');
         if (vipRow) {
             vipRow.style.visibility = '';
-            vipRow.style.display = _cfg.VIP_CARD_VISIBLE === false ? 'none' : '';
+            vipRow.style.display = vipVisible ? '' : 'none';
         }
-        // Currency
-        const isMmk = _cfg.CURRENCY_MODE === 'mmk';
+
+        // Currency mode — header balance
         document.getElementById('coinSymbolLeft').style.display  = isMmk ? 'none' : '';
         document.getElementById('coinSymbolRight').style.display = isMmk ? '' : 'none';
-        document.getElementById('profileCoinSymbol').textContent  = isMmk ? 'ကျပ်' : '🪙';
-        const reward = _cfg.REFERRAL_REWARD || 50;
-        document.getElementById('inviteRewardText').textContent   = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
+        document.getElementById('profileCoinSymbol').textContent = isMmk ? 'ကျပ်' : '🪙';
 
-        // Task labels
-        const s = (id,v) => { const e=document.getElementById(id); if(e&&v) e.textContent=v; };
+        // Referral reward text
+        const reward = Number(_cfg.REFERRAL_REWARD) || 50;
+        const earnInviteBtn = document.querySelector('.earn-invite-btn');
+        document.getElementById('inviteRewardText').textContent = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
+        if (earnInviteBtn) earnInviteBtn.textContent = isMmk
+            ? `👥 သူငယ်ချင်းများကိုဖိတ်ပြီး ${reward}ကျပ် ရယူလိုက်ပါ`
+            : `👥 သူငယ်ချင်းများကိုဖိတ်ပြီး ${reward}🪙 ရယူလိုက်ပါ`;
+
+        // Withdrawal button — show min withdrawal amount
+        const minW = Number(_cfg.MIN_WITHDRAWAL) || 100000;
+        const wdBtns = document.querySelectorAll('#homeWithdrawBtn, #profileWithdrawBtn');
+        wdBtns.forEach(btn => {
+            if (btn) btn.title = `Minimum: ${minW.toLocaleString()} coins`;
+        });
+
+        // Home task labels
+        const s = (id,v) => { const e=document.getElementById(id); if(e && v != null) e.textContent=v; };
         s('dailyCheckinLabel',      _cfg.DAILY_CHECKIN_LABEL);
         s('dailyCheckinRewardLabel',_cfg.DAILY_CHECKIN_REWARD_LABEL);
         s('task1Label',_cfg.TASK1_LABEL); s('task1RewardLabel',_cfg.TASK1_REWARD_LABEL);
         s('task2Label',_cfg.TASK2_LABEL); s('task2RewardLabel',_cfg.TASK2_REWARD_LABEL);
         s('task3Label',_cfg.TASK3_LABEL); s('task3RewardLabel',_cfg.TASK3_REWARD_LABEL);
         s('task4Label',_cfg.TASK4_LABEL); s('task4RewardLabel',_cfg.TASK4_REWARD_LABEL);
-        const b = (id,v) => { const e=document.getElementById(id); if(e&&v&&!e.disabled&&!e.textContent.includes('⏳')&&!e.textContent.includes('✅')) e.textContent=v; };
+        // Button labels (only update if not showing cooldown)
+        const b = (id,v) => {
+            const e=document.getElementById(id);
+            if(e && v != null && !e.disabled && !e.textContent.includes('⏳') && !e.textContent.includes('✅'))
+                e.textContent=v;
+        };
         b('task1Btn',_cfg.TASK1_BTN_LABEL); b('task2Btn',_cfg.TASK2_BTN_LABEL);
         b('task3Btn',_cfg.TASK3_BTN_LABEL); b('task4Btn',_cfg.TASK4_BTN_LABEL);
+
+        // Earn tab labels — refresh earn grid if initialized
+        if (typeof earn !== 'undefined') earn._applyLabels?.();
 
     } catch(e) { console.error('config',e); }
 }
@@ -621,7 +664,7 @@ async function fetchConfig() {
 // ─── VPN Gate ─────────────────────────────────────────────────
 const vpn = {
     async init() {
-        if (_cfg.VPN_MODE === false) { this._allow(); return; }
+        const vpnOn = _cfg.VPN_MODE !== false && _cfg.VPN_MODE !== 'false'; if (!vpnOn) { this._allow(); return; }
         document.getElementById('vpnPage').classList.add('active');
         await this.check();
     },
@@ -638,7 +681,7 @@ const vpn = {
                 document.getElementById('vpnIcon').textContent = '✅';
                 setTimeout(() => this._allow(), 1200);
             } else {
-                loc.textContent = (d.country||'Unknown') + ' ❌';
+                loc.textContent = (d.country||'Unknown') + ' ❌ — VPN ချိတ်ဆက်ပြီး ထပ်စစ်ဆေးပါ';
                 document.getElementById('vpnIcon').textContent = '❌';
                 btn.disabled = false;
                 btn.textContent = '🔄 ထပ်စစ်ဆေးပါ';
@@ -1380,6 +1423,12 @@ const games = (() => {
 // ─── Withdrawal ───────────────────────────────────────────────
 let _selectedMethod = '';
 function openWithdrawModal() {
+    const minW = Number(_cfg.MIN_WITHDRAWAL) || 100000;
+    const isMmk = _cfg.CURRENCY_MODE === 'mmk';
+    const unit = isMmk ? 'ကျပ်' : 'coins';
+    const hint = document.getElementById('minWithdrawHint');
+    if (hint) hint.textContent = `အနည်းဆုံး ${minW.toLocaleString()} ${unit} ထုတ်ရမည်`;
+    document.getElementById('amountInput').placeholder = `ထုတ်မည့် ပမာဏ (min: ${minW.toLocaleString()})`;
     document.getElementById('withdrawModal').classList.add('active');
 }
 async function submitWithdrawal() {
@@ -1388,10 +1437,15 @@ async function submitWithdrawal() {
     const amount = document.getElementById('amountInput').value.trim();
     const name   = document.getElementById('accountNameInput').value.trim();
     if (!phone||!amount||!name) return toast('📝 အချက်အလက်ပြည့်ပြည့်ဖြည့်ပါ');
+    const amtNum = parseFloat(amount);
+    const minW = Number(_cfg.MIN_WITHDRAWAL) || 100000;
+    if (isNaN(amtNum) || amtNum <= 0) return toast('❌ ပမာဏ မှားနေသည်');
+    if (amtNum < minW) return toast(`❌ အနည်းဆုံး ${minW.toLocaleString()} ထုတ်ရမည်`);
+    if (_user && amtNum > (_user.coins||0)) return toast('❌ Balance မလောက်ပါ');
     try {
-        const r = await fetch(`${API}/withdraw`, { method:'POST', headers, body: JSON.stringify({ method:_selectedMethod, phone, amount:parseFloat(amount), accountName:name }) });
+        const r = await fetch(`${API}/withdraw`, { method:'POST', headers, body: JSON.stringify({ method:_selectedMethod, phone, accountDetails:phone, amount:amtNum, accountName:name }) });
         const d = await r.json();
-        if (d.success) { toast('✅ ထုတ်ရန်တောင်းဆိုမှု ပို့ပြီ'); document.getElementById('withdrawModal').classList.remove('active'); }
+        if (d.success) { toast('✅ ထုတ်ရန်တောင်းဆိုမှု ပို့ပြီ'); document.getElementById('withdrawModal').classList.remove('active'); await fetchUser(); }
         else toast('❌ '+(d.error||'Error'));
     } catch(e) { toast('❌ Error'); }
 }
