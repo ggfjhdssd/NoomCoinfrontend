@@ -196,7 +196,7 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
     <div class="vpn-card">
         <div class="vpn-icon" id="vpnIcon">🔒</div>
         <h2 style="color:#ffd700;margin-bottom:8px;">Security Check</h2>
-        <p style="color:#8e8e9d;font-size:13px;margin-bottom:4px;">PayCoinAds ကိုသုံးရန်<br><b style="color:#fff;">Singapore</b> သို့မဟုတ် <b style="color:#fff;">United States VPN</b> ချိတ်ဆက်ထားပါ</p>
+        <p style="color:#8e8e9d;font-size:13px;margin-bottom:4px;">NoomCoin ကိုသုံးရန်<br><b style="color:#fff;">Singapore</b> သို့မဟုတ် <b style="color:#fff;">United States VPN</b> ချိတ်ဆက်ထားပါ</p>
         <div class="location-text" id="vpnLocationText">စစ်ဆေးနေသည်...</div>
         <button class="vpn-btn" id="vpnCheckBtn" onclick="NC.vpn.check()">🔍 စစ်ဆေးပါ</button>
     </div>
@@ -979,7 +979,7 @@ async function submitWithdrawal() {
 function shareInvite() {
     if (!_user) return;
     const txt = `ဖုန်းလေးပွတ်ရင်း အပိုဝင်ငွေ ရှာချင်သူများအတွက် NoomCoin 🐻 ကျွန်တော့်ရဲ့ Link ကနေ ဝင်ဆော့ရုံနဲ့ သင် 50🪙 ချက်ခြင်းရပြီး Coins တွေ စုပြီး ငွေထုတ်လို့ရပြီနော်! အခုပဲ စမ်းကြည့်လိုက်ပါ 👇`;
-    const url  = `https://t.me/NoomCoinMM_bot?start=${_user.userId||_user.id}`;
+    const url  = `https://t.me/NoomCoinads_bot?start=${_user.userId||_user.id}`;
     tg?.openTelegramLink?.(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(txt)}`);
 }
 
