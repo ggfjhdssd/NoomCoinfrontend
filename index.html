@@ -119,17 +119,10 @@ input:checked+.vip-slider:before{transform:translateX(20px);}
 .game-card .badge{display:inline-block;background:rgba(255,215,0,0.15);color:#ffd700;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:6px;}
 /* ─── Lucky Wheel (in Games) ─── */
 .lw-wrap{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.15);border-radius:20px;padding:16px;margin-bottom:12px;}
-.wheel-container{position:relative;width:260px;height:260px;margin:0 auto 16px;}
-.wheel{width:100%;height:100%;border-radius:50%;position:relative;background:conic-gradient(
-    #ffd700 0deg 45deg,#ff8c00 45deg 90deg,#ff6b6b 90deg 135deg,
-    #4ecdc4 135deg 180deg,#a8e6cf 180deg 225deg,#ffd3b6 225deg 270deg,
-    #ffaaa5 270deg 315deg,#ff8b94 315deg 360deg);
-border:8px solid #222;box-shadow:0 0 30px rgba(255,215,0,0.3);
-transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
-.wheel-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;display:grid;grid-template-columns:1fr 1fr;text-align:center;pointer-events:none;}
-.wl{font-size:9px;font-weight:700;color:#121212;padding:2px;}
-.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;background:linear-gradient(135deg,#ffd700,#ff8c00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:4px solid #121212;z-index:5;}
-.wheel-pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:36px;color:#ffd700;filter:drop-shadow(0 0 10px gold);z-index:10;}
+.wheel-container{position:relative;width:280px;height:280px;margin:0 auto 16px;}
+.wheel-canvas{width:100%;height:100%;border-radius:50%;transition:transform 4s cubic-bezier(0.15,0,0.15,1);box-shadow:0 0 30px rgba(255,215,0,0.4);}
+.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;background:linear-gradient(135deg,#ffd700,#ff8c00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:4px solid #121212;z-index:5;box-shadow:0 0 12px rgba(255,215,0,0.5);}
+.wheel-pointer{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:38px;color:#ffd700;filter:drop-shadow(0 0 10px gold);z-index:10;}
 .spin-btn{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:14px 32px;border-radius:50px;color:#121212;font-weight:700;font-size:16px;cursor:pointer;font-family:inherit;width:100%;}
 .spin-btn:disabled{opacity:0.4;cursor:not-allowed;}
 .ticket-info{text-align:center;margin-top:8px;font-size:13px;color:#ffd700;font-weight:700;}
@@ -188,6 +181,27 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
 /* ─── Toast ─── */
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(20,22,27,0.95);border:1px solid rgba(255,215,0,0.3);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;pointer-events:none;transition:opacity 0.3s;z-index:5000;white-space:nowrap;}
 .toast.show{opacity:1;}
+/* ─── Coin Clicker Game ─── */
+.cc-wrap{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.15);border-radius:20px;padding:16px;margin-bottom:12px;}
+.cc-game-area{position:relative;width:100%;height:320px;border-radius:20px;background:rgba(0,0,0,0.4);overflow:hidden;margin-bottom:12px;cursor:pointer;}
+.cc-objects-container{position:relative;width:100%;height:100%;}
+.cc-object{position:absolute;font-size:34px;cursor:pointer;user-select:none;-webkit-user-select:none;pointer-events:auto;z-index:10;animation:ccFlip 1s linear infinite;}
+@keyframes ccFlip{0%{transform:rotateY(0deg);}100%{transform:rotateY(360deg);}}
+.cc-object:active{transform:scale(0.85);}
+.cc-stats{display:flex;justify-content:space-between;align-items:center;background:rgba(20,22,27,0.9);border-radius:16px;padding:12px 16px;border:1px solid rgba(255,215,0,0.15);}
+.cc-score{font-size:22px;font-weight:700;color:#ffd700;}
+.cc-timer{font-size:22px;font-weight:700;color:#fff;}
+.cc-timer.warning{color:#ff4444;animation:ccShake 0.2s infinite;}
+@keyframes ccShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-3px);}75%{transform:translateX(3px);}}
+.cc-start-btn{width:100%;padding:14px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:16px;color:#121212;font-weight:700;font-size:16px;cursor:pointer;font-family:inherit;margin-top:10px;}
+.cc-start-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.cc-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;border-radius:20px;}
+.cc-countdown{font-size:80px;font-weight:900;color:#ffd700;text-shadow:0 0 20px gold;}
+.cc-result-box{background:linear-gradient(145deg,#1e1e2e,#16161f);border:2px solid #ffd700;border-radius:24px;padding:20px;text-align:center;width:85%;}
+.cc-result-box h2{color:#ffd700;font-size:28px;margin-bottom:10px;}
+.cc-result-box p{font-size:16px;margin-bottom:16px;color:#e0e0f0;}
+.cc-popup-btn{width:100%;padding:12px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:30px;color:#121212;font-weight:700;font-size:14px;cursor:pointer;margin:5px 0;font-family:inherit;}
+.cc-popup-btn.secondary{background:transparent;border:1px solid rgba(255,215,0,0.3);color:#ffd700;}
     </style>
 </head>
 <body>
@@ -338,15 +352,8 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
             <div class="lw-panel active" id="lwPanelSpin">
                 <div class="wheel-container">
                     <div class="wheel-pointer">▼</div>
-                    <div class="wheel" id="lwWheel">
-                        <div class="wheel-label">
-                            <div class="wl">200</div><div class="wl">20</div>
-                            <div class="wl">15</div><div class="wl">Again</div>
-                            <div class="wl">Free</div><div class="wl">100</div>
-                            <div class="wl">50</div><div class="wl">30</div>
-                        </div>
-                        <div class="wheel-center">🪙</div>
-                    </div>
+                    <canvas class="wheel-canvas" id="lwWheelCanvas" width="280" height="280"></canvas>
+                    <div class="wheel-center">🪙</div>
                 </div>
                 <button class="spin-btn" id="lwSpinBtn" onclick="NC.games.lw.spin()">🎰 Spin</button>
                 <div class="ticket-info" id="lwTicketInfo">🎟️ Tickets: 0</div>
@@ -375,6 +382,35 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
             </div>
         </div>
         <button class="earn-invite-btn" onclick="NC.shareInvite()" style="margin-top:8px;">👥 သူငယ်ချင်းများကိုဖိတ်ပြီး 50🪙 ရယူလိုက်ပါ</button>
+
+        <!-- Coin Clicker Panel -->
+        <div class="cc-wrap" id="ccWrap" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-size:14px;font-weight:700;color:#ffd700;">🪙 Coin Clicker</div>
+                <button onclick="NC.games.closeCoinClicker()" style="background:rgba(255,255,255,0.06);border:none;color:#8e8e9d;padding:4px 12px;border-radius:20px;cursor:pointer;font-family:inherit;">✕ Back</button>
+            </div>
+            <div class="cc-game-area" id="ccGameArea">
+                <div class="cc-objects-container" id="ccContainer"></div>
+                <!-- Countdown overlay -->
+                <div class="cc-overlay" id="ccCountdownOverlay" style="display:none;">
+                    <div class="cc-countdown" id="ccCountdown">3</div>
+                </div>
+                <!-- Result overlay -->
+                <div class="cc-overlay" id="ccResultOverlay" style="display:none;">
+                    <div class="cc-result-box">
+                        <h2 id="ccResultTitle">🎉 အောင်မြင်!</h2>
+                        <p id="ccResultMsg">သင် 45🪙 ရပြီ!</p>
+                        <button class="cc-popup-btn" id="ccWatchAdBtn" onclick="NC.games.cc.watchAdContinue()">📺 Ad ကြည့်ပြီး ဆက်ဆော့</button>
+                        <button class="cc-popup-btn secondary" onclick="NC.games.cc.quit()">🚪 ထွက်မည်</button>
+                    </div>
+                </div>
+            </div>
+            <div class="cc-stats">
+                <div class="cc-score">💰 <span id="ccScore">0.0</span></div>
+                <div class="cc-timer" id="ccTimerEl">⏱️ <span id="ccTimerDisplay">38</span>s</div>
+            </div>
+            <button class="cc-start-btn" id="ccStartBtn" onclick="NC.games.cc.start()">🎮 ကစားရန် (50🪙 ကျသင့်မည်)</button>
+        </div>
     </div>
 
     <!-- ══════ PROFILE PAGE ══════ -->
@@ -514,8 +550,14 @@ async function fetchUser() {
     try {
         const r = await fetch(`${API}/user`, { headers });
         if (!r.ok) return;
+        const prev = _user;
         _user = await r.json();
         _renderHeader();
+        // Show free ticket toast for new users (first time only)
+        if (!prev && _user && _user.spinTickets >= 1 && !sessionStorage.getItem('nc_freeticket_shown')) {
+            sessionStorage.setItem('nc_freeticket_shown','1');
+            setTimeout(() => toast('🎟️ ပထမဆုံး Free Ticket 1 ခု ရပြီ! Lucky Wheel ဆော့ကြည့်ပါ 🎰', 4000), 1500);
+        }
     } catch(e) {}
 }
 
@@ -837,26 +879,116 @@ const earn = (() => {
 const games = (() => {
     function openLuckyWheel() {
         document.getElementById('lwWrap').style.display = '';
+        document.getElementById('ccWrap').style.display = 'none';
         lw._refresh();
+        lw._drawWheel(0);
     }
     function closeLuckyWheel() { document.getElementById('lwWrap').style.display = 'none'; }
-    function openCoinClicker() { toast('🪙 Coin Clicker — Coming Soon!'); }
+    function openCoinClicker() {
+        document.getElementById('ccWrap').style.display = '';
+        document.getElementById('lwWrap').style.display = 'none';
+        cc._init();
+    }
+    function closeCoinClicker() {
+        cc._cleanup();
+        document.getElementById('ccWrap').style.display = 'none';
+    }
 
-    // Lucky Wheel sub-module
+    // ══════════════════════════════════════════
+    // Lucky Wheel sub-module (canvas-based)
+    // ══════════════════════════════════════════
     const lw = (() => {
         let _tickets = 0;
         let _spinning = false;
-        let _deg = 0;
+        let _currentDeg = 0;
         let _adCount = 0;
         let _adCooldownEnd = 0;
         let _claimableRef = 0;
         let _refTotal = 0;
-        const PRIZES = [200,20,15,0,1,100,50,30]; // 0=try again, 1=free spin
+
+        // Segments: must match backend PRIZES order exactly
+        // index 0..7 → 10,20,50,70,85,100,Free,TryAgain
+        const SEGMENTS = [
+            { label: '10',       color: '#ffd700' },
+            { label: '20',       color: '#ff8c00' },
+            { label: '50',       color: '#ff6b6b' },
+            { label: '70',       color: '#4ecdc4' },
+            { label: '85',       color: '#a8e6cf' },
+            { label: '100',      color: '#ffd3b6' },
+            { label: 'Free',     color: '#ffaaa5' },
+            { label: 'TryAgain', color: '#ff8b94' },
+        ];
+        const NUM_SEG = SEGMENTS.length;
+        const SEG_ANG = (2 * Math.PI) / NUM_SEG; // 45° each
+
+        function _drawWheel(rotateDeg) {
+            const canvas = document.getElementById('lwWheelCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            const cx = W / 2, cy = H / 2;
+            const R = Math.min(cx, cy) - 6;
+            ctx.clearRect(0, 0, W, H);
+
+            const startOffset = -Math.PI / 2; // top = 0°
+            const rotRad = (rotateDeg * Math.PI) / 180;
+
+            // Draw border ring
+            ctx.beginPath();
+            ctx.arc(cx, cy, R + 4, 0, 2 * Math.PI);
+            ctx.fillStyle = '#222';
+            ctx.fill();
+
+            for (let i = 0; i < NUM_SEG; i++) {
+                const startAngle = startOffset + rotRad + i * SEG_ANG;
+                const endAngle = startAngle + SEG_ANG;
+
+                // Fill segment
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, R, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = SEGMENTS[i].color;
+                ctx.fill();
+
+                // Segment border
+                ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Label
+                ctx.save();
+                const midAngle = startAngle + SEG_ANG / 2;
+                const labelR = R * 0.68;
+                const lx = cx + labelR * Math.cos(midAngle);
+                const ly = cy + labelR * Math.sin(midAngle);
+                ctx.translate(lx, ly);
+                ctx.rotate(midAngle + Math.PI / 2);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const label = SEGMENTS[i].label;
+                const isLong = label.length > 4;
+                ctx.font = `bold ${isLong ? 9 : 11}px Inter, sans-serif`;
+                ctx.fillStyle = '#121212';
+                ctx.shadowColor = 'rgba(255,255,255,0.4)';
+                ctx.shadowBlur = 2;
+                ctx.fillText(label, 0, 0);
+                ctx.restore();
+            }
+
+            // Outer ring glow
+            ctx.beginPath();
+            ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255,215,0,0.5)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
 
         function showTab(tab) {
             ['spin','ad','invite'].forEach(t => {
-                document.getElementById('lwTab'+t[0].toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
-                document.getElementById('lwPanel'+t[0].toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+                const key = t[0].toUpperCase() + t.slice(1);
+                document.getElementById('lwTab'+key).classList.toggle('active', t===tab);
+                document.getElementById('lwPanel'+key).classList.toggle('active', t===tab);
             });
         }
 
@@ -878,13 +1010,11 @@ const games = (() => {
         function _updateUI() {
             document.getElementById('lwTicketInfo').textContent = `🎟️ Tickets: ${_tickets}`;
             document.getElementById('lwSpinBtn').disabled = _tickets<=0 || _spinning;
-            // Ad panel
             const adPct = Math.min(_adCount/5,1)*100;
             document.getElementById('lwAdCount').textContent = `${Math.min(_adCount,5)} / 5`;
             document.getElementById('lwAdProgress').style.width = adPct+'%';
             const canClaim = _adCount>=5 && Date.now()>_adCooldownEnd;
             document.getElementById('lwAdClaimBtn').disabled = !canClaim;
-            // Invite panel
             const refForNext = Math.max(0, 5 - (_refTotal%5));
             document.getElementById('lwInviteCount').textContent = `${_refTotal%5||(_claimableRef?5:0)} / 5`;
             document.getElementById('lwInviteProgress').style.width = Math.min((_refTotal%5)/5,1)*100+'%';
@@ -899,25 +1029,49 @@ const games = (() => {
             try {
                 const r = await fetch(`${API}/games/spin`, { method:'POST', headers });
                 const d = await r.json();
-                if (!d.success) { toast('❌ '+(d.error||'Error')); _spinning=false; return; }
+                if (!d.success) { toast('❌ '+(d.error||'Error')); _spinning=false; _updateUI(); return; }
+
                 const idx = d.prizeIndex ?? 0;
-                const offset = 22.5 + 90;
-                const currentMod = _deg % 360;
-                const target = 360 - (idx*45 + offset);
-                let delta = ((target-currentMod)%360+360)%360;
-                if (delta<45) delta+=360;
-                _deg += delta + 360*5;
-                document.getElementById('lwWheel').style.transform = `rotate(${_deg}deg)`;
-                setTimeout(() => {
-                    const prize = PRIZES[idx];
-                    if (prize===0) showAlert('😅 Try Again!','운이 없었습니다. 다시 도전!');
-                    else if (prize===1) showAlert('🎟️ Free Spin!',`+1 Free Ticket ရပြီ!`);
-                    else showAlert('🎉 Congratulations!',`${prize}🪙 ရပြီ!`);
-                    _spinning=false;
-                    _refresh();
-                    fetchUser();
-                }, 4200);
-            } catch(e) { toast('❌ Error'); _spinning=false; document.getElementById('lwSpinBtn').disabled=false; }
+                // Each segment is 45°. Pointer is at top (0°).
+                // Segment idx starts from top going clockwise.
+                // To land segment idx under pointer: wheel must rotate so segment idx center is at top.
+                // center of segment idx from top = idx * 45 + 22.5 degrees
+                // We need that position to be at 0° (top), so rotate = 360 - (idx*45 + 22.5) + 360*N
+                const segCenter = idx * 45 + 22.5;
+                const currentMod = _currentDeg % 360;
+                let delta = ((360 - segCenter) - currentMod + 360) % 360;
+                if (delta < 45) delta += 360;
+                const totalDeg = _currentDeg + delta + 360 * 5;
+
+                // Animate canvas wheel
+                const startDeg = _currentDeg;
+                const duration = 4000;
+                const startTime = performance.now();
+                function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+                function animFrame(now) {
+                    const elapsed = now - startTime;
+                    const t = Math.min(elapsed / duration, 1);
+                    const cur = startDeg + (totalDeg - startDeg) * easeOut(t);
+                    _drawWheel(cur);
+                    if (t < 1) {
+                        requestAnimationFrame(animFrame);
+                    } else {
+                        _currentDeg = totalDeg;
+                        _spinning = false;
+                        _tickets = d.newTickets ?? Math.max(0, _tickets - 1);
+                        _updateUI();
+                        fetchUser();
+                        // Show result
+                        const pName = d.prize || '';
+                        if (d.type === 'tryagain') showAlert('😅 Try Again!', 'ကံမကောင်းဘူး၊ နောက်တစ်ကြိမ် ထပ်ကြိုးစားပါ!');
+                        else if (d.type === 'freespin') showAlert('🎟️ Free Spin!', '+1 Free Ticket ရပြီ!');
+                        else showAlert('🎉 ဂုဏ်ယူပါတယ်!', `${pName} ရပြီ!`);
+                    }
+                }
+                requestAnimationFrame(animFrame);
+
+            } catch(e) { toast('❌ Error'); _spinning=false; _updateUI(); }
         }
 
         async function watchAd() {
@@ -950,10 +1104,277 @@ const games = (() => {
             } catch(e) { toast('❌ Error'); }
         }
 
-        return { showTab, spin, watchAd, claimAdTicket, claimRefTicket, _refresh };
+        return { showTab, spin, watchAd, claimAdTicket, claimRefTicket, _refresh, _drawWheel };
     })();
 
-    return { openLuckyWheel, closeLuckyWheel, openCoinClicker, lw };
+    // ══════════════════════════════════════════
+    // Coin Clicker sub-module
+    // ══════════════════════════════════════════
+    const cc = (() => {
+        const ENTRY_FEE = 50;
+        const MAX_SCORE = 100;
+        const GAME_DURATION = 38;
+
+        let _state = 'idle'; // idle | countdown | playing | paused | gameover
+        let _score = 0;
+        let _timeLeft = GAME_DURATION;
+        let _objects = [];
+        let _animFrame = null;
+        let _timerInterval = null;
+        let _lastSpawn = 0;
+        let _isStarting = false;
+        let _audioCtx = null;
+
+        function _getSpawnInterval() {
+            if (_score >= 80) return 200;
+            if (_score >= 60) return 300;
+            return 400;
+        }
+        function _getBombProb() {
+            if (_score >= 90) return 0.6;
+            if (_score >= 80) return 0.5;
+            if (_score >= 70) return 0.4;
+            if (_score >= 60) return 0.3;
+            return 0.15;
+        }
+        function _getSpeed() {
+            if (_score >= 80) return 3.5;
+            if (_score >= 60) return 2.5;
+            return 1.8;
+        }
+        function _coinValue() {
+            const r = Math.random();
+            if (r < 0.4) return 1.0;
+            if (r < 0.7) return 0.5;
+            return 0.2;
+        }
+        function _playTick() {
+            try {
+                if (!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+                if (_audioCtx.state === 'suspended') _audioCtx.resume();
+                const osc = _audioCtx.createOscillator();
+                const gain = _audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.value = 880;
+                gain.gain.value = 0.08;
+                osc.connect(gain); gain.connect(_audioCtx.destination);
+                osc.start(); osc.stop(_audioCtx.currentTime + 0.08);
+            } catch(e) {}
+        }
+
+        function _clearObjects() {
+            _objects.forEach(o => { if (o.el.parentNode) o.el.parentNode.removeChild(o.el); });
+            _objects = [];
+        }
+
+        function _spawnObject() {
+            const container = document.getElementById('ccContainer');
+            if (!container) return;
+            const isBomb = _state === 'playing' && Math.random() < _getBombProb();
+            const value = isBomb ? 0 : _coinValue();
+            const el = document.createElement('div');
+            el.className = 'cc-object';
+            el.textContent = isBomb ? '💣' : '🪙';
+            const maxX = container.clientWidth - 44;
+            el.style.left = Math.max(0, Math.random() * maxX) + 'px';
+            el.style.top = '-50px';
+            el.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                if (_state !== 'playing') return;
+                if (isBomb) {
+                    _state = 'paused';
+                    clearInterval(_timerInterval);
+                    _showResult('bomb');
+                } else {
+                    _score = Math.min(_score + value, MAX_SCORE);
+                    document.getElementById('ccScore').textContent = _score.toFixed(1);
+                    _playTick();
+                    el.style.opacity = '0';
+                    setTimeout(() => {
+                        const i = _objects.findIndex(o => o.el === el);
+                        if (i !== -1) { if(el.parentNode) el.parentNode.removeChild(el); _objects.splice(i,1); }
+                    }, 80);
+                }
+            });
+            container.appendChild(el);
+            _objects.push({ el, y: -50, isBomb, value });
+        }
+
+        function _gameLoop(ts) {
+            if (_state === 'idle' || _state === 'gameover') return;
+            const container = document.getElementById('ccContainer');
+            if (!container) return;
+            const h = container.clientHeight || 320;
+
+            // Spawn
+            if (_state === 'playing' || _state === 'countdown') {
+                const interval = _state === 'countdown' ? 800 : _getSpawnInterval();
+                if (ts - _lastSpawn > interval && _objects.length < 25) {
+                    _spawnObject(); _lastSpawn = ts;
+                }
+            }
+
+            // Move
+            const speed = _getSpeed();
+            for (let i = _objects.length - 1; i >= 0; i--) {
+                const o = _objects[i];
+                o.y += speed;
+                o.el.style.top = o.y + 'px';
+                if (o.y > h + 10) {
+                    if (o.el.parentNode) o.el.parentNode.removeChild(o.el);
+                    _objects.splice(i, 1);
+                }
+            }
+            _animFrame = requestAnimationFrame(_gameLoop);
+        }
+
+        function _showCountdown(cb) {
+            const overlay = document.getElementById('ccCountdownOverlay');
+            const el = document.getElementById('ccCountdown');
+            overlay.style.display = 'flex';
+            let count = 3;
+            el.textContent = count;
+            const iv = setInterval(() => {
+                count--;
+                if (count > 0) { el.textContent = count; }
+                else if (count === 0) { el.textContent = 'GO!'; }
+                else { clearInterval(iv); overlay.style.display = 'none'; cb(); }
+            }, 1000);
+        }
+
+        function _startTimer() {
+            _timerInterval = setInterval(() => {
+                _timeLeft--;
+                document.getElementById('ccTimerDisplay').textContent = _timeLeft;
+                const timerEl = document.getElementById('ccTimerEl');
+                if (_timeLeft <= 5) { timerEl.classList.add('warning'); _playTick(); }
+                else timerEl.classList.remove('warning');
+                if (_timeLeft <= 0) { clearInterval(_timerInterval); _endGame(); }
+            }, 1000);
+        }
+
+        function _endGame() {
+            _state = 'gameover';
+            if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
+            clearInterval(_timerInterval);
+            _clearObjects();
+            _showResult('win');
+        }
+
+        function _showResult(reason) {
+            const overlay = document.getElementById('ccResultOverlay');
+            const title = document.getElementById('ccResultTitle');
+            const msg = document.getElementById('ccResultMsg');
+            const adBtn = document.getElementById('ccWatchAdBtn');
+            overlay.style.display = 'flex';
+            if (reason === 'win') {
+                title.textContent = '🎉 အောင်မြင်!';
+                msg.textContent = `သင် ${_score.toFixed(1)}🪙 ရပြီ!`;
+                adBtn.style.display = 'none';
+                // Submit score
+                _submitScore(_score);
+            } else if (reason === 'bomb') {
+                title.textContent = '💣 BOOM!';
+                msg.textContent = 'ဗုံးနှိပ်မိပြီ! Ad ကြည့်ပြီး ဆက်ဆော့မည်လား?';
+                adBtn.style.display = 'block';
+            }
+        }
+
+        async function _submitScore(earned) {
+            try {
+                const r = await fetch(`${API}/games/coin-end`, {
+                    method:'POST', headers,
+                    body: JSON.stringify({ earnedCoins: Math.min(earned, MAX_SCORE) })
+                });
+                const d = await r.json();
+                if (d.success) { await fetchUser(); toast(`✅ +${earned.toFixed(1)}🪙 balance ထည့်ပြီ!`); }
+            } catch(e) {}
+        }
+
+        async function start() {
+            if (_isStarting) return;
+            if (!_user || _user.coins < ENTRY_FEE) {
+                toast(`❌ Coins ${ENTRY_FEE} မရှိပါ`);
+                return;
+            }
+            _isStarting = true;
+            const btn = document.getElementById('ccStartBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Loading...';
+            try {
+                const r = await fetch(`${API}/games/coin-start`, { method:'POST', headers });
+                const d = await r.json();
+                if (!r.ok) { toast('❌ '+(d.error||'Error')); btn.disabled=false; btn.textContent=`🎮 ကစားရန် (${ENTRY_FEE}🪙 ကျသင့်မည်)`; _isStarting=false; return; }
+                await fetchUser();
+                _reset();
+                btn.style.display = 'none';
+                document.getElementById('ccResultOverlay').style.display = 'none';
+                _state = 'countdown';
+                _lastSpawn = performance.now();
+                _animFrame = requestAnimationFrame(_gameLoop);
+                _showCountdown(() => {
+                    _state = 'playing';
+                    _startTimer();
+                });
+            } catch(e) { toast('❌ Network Error'); }
+            _isStarting = false;
+            btn.disabled = false;
+            btn.textContent = `🎮 ကစားရန် (${ENTRY_FEE}🪙 ကျသင့်မည်)`;
+        }
+
+        function _reset() {
+            _clearObjects();
+            _score = 0;
+            _timeLeft = GAME_DURATION;
+            document.getElementById('ccScore').textContent = '0.0';
+            document.getElementById('ccTimerDisplay').textContent = GAME_DURATION;
+            document.getElementById('ccTimerEl').classList.remove('warning');
+            clearInterval(_timerInterval);
+            if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
+        }
+
+        async function watchAdContinue() {
+            try {
+                const AdController = await window.Adsgram?.init({ blockId:'5183' });
+                AdController.show().then(() => {
+                    document.getElementById('ccResultOverlay').style.display = 'none';
+                    _state = 'countdown';
+                    _lastSpawn = performance.now();
+                    if (!_animFrame) _animFrame = requestAnimationFrame(_gameLoop);
+                    _showCountdown(() => { _state = 'playing'; _startTimer(); });
+                }).catch(() => toast('❌ Ad မပြနိုင်ပါ'));
+            } catch(e) { toast('❌ Ad Error'); }
+        }
+
+        function quit() {
+            _state = 'gameover';
+            _clearObjects();
+            document.getElementById('ccResultOverlay').style.display = 'none';
+            document.getElementById('ccStartBtn').style.display = 'block';
+            document.getElementById('ccStartBtn').textContent = `🎮 ကစားရန် (${ENTRY_FEE}🪙 ကျသင့်မည်)`;
+        }
+
+        function _init() {
+            _reset();
+            _state = 'idle';
+            document.getElementById('ccResultOverlay').style.display = 'none';
+            document.getElementById('ccCountdownOverlay').style.display = 'none';
+            document.getElementById('ccStartBtn').style.display = 'block';
+            document.getElementById('ccStartBtn').textContent = `🎮 ကစားရန် (${ENTRY_FEE}🪙 ကျသင့်မည်)`;
+            document.getElementById('ccScore').textContent = '0.0';
+            document.getElementById('ccTimerDisplay').textContent = GAME_DURATION;
+        }
+
+        function _cleanup() {
+            _state = 'gameover';
+            _clearObjects();
+            clearInterval(_timerInterval);
+            if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
+        }
+
+        return { start, watchAdContinue, quit, _init, _cleanup };
+    })();
+
+    return { openLuckyWheel, closeLuckyWheel, openCoinClicker, closeCoinClicker, lw, cc };
 })();
 
 // ─── Withdrawal ───────────────────────────────────────────────
