@@ -119,10 +119,29 @@ input:checked+.vip-slider:before{transform:translateX(20px);}
 .game-card .badge{display:inline-block;background:rgba(255,215,0,0.15);color:#ffd700;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:6px;}
 /* ─── Lucky Wheel (in Games) ─── */
 .lw-wrap{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.15);border-radius:20px;padding:16px;margin-bottom:12px;}
-.wheel-container{position:relative;width:280px;height:280px;margin:0 auto 16px;}
-.wheel-canvas{width:100%;height:100%;border-radius:50%;transition:transform 4s cubic-bezier(0.15,0,0.15,1);box-shadow:0 0 30px rgba(255,215,0,0.4);}
-.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;background:linear-gradient(135deg,#ffd700,#ff8c00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:4px solid #121212;z-index:5;box-shadow:0 0 12px rgba(255,215,0,0.5);}
-.wheel-pointer{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:38px;color:#ffd700;filter:drop-shadow(0 0 10px gold);z-index:10;}
+.wheel-container{position:relative;width:260px;height:260px;margin:0 auto 16px;}
+.wheel{width:100%;height:100%;border-radius:50%;position:relative;
+/* 8 equal segments 45deg each, clockwise from top (pointer at top=12 o'clock)
+   Segment order: 10,20,50,70,85,100,Free,TryAgain */
+background:conic-gradient(
+    from -90deg,
+    #e74c3c   0deg  45deg,
+    #e67e22  45deg  90deg,
+    #f1c40f  90deg 135deg,
+    #2ecc71 135deg 180deg,
+    #1abc9c 180deg 225deg,
+    #3498db 225deg 270deg,
+    #9b59b6 270deg 315deg,
+    #95a5a6 315deg 360deg
+);
+border:8px solid #222;box-shadow:0 0 30px rgba(255,215,0,0.3);
+transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
+.wheel-label{position:absolute;inset:0;border-radius:50%;pointer-events:none;}
+.wl{position:absolute;top:18%;left:50%;font-size:10px;font-weight:800;color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,0.8);transform-origin:0 50%;
+    transform:translateX(-50%);white-space:nowrap;text-align:center;}
+.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;background:linear-gradient(135deg,#ffd700,#ff8c00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:4px solid #121212;z-index:5;}
+.wheel-pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:36px;color:#ffd700;filter:drop-shadow(0 0 10px gold);z-index:10;}
 .spin-btn{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:14px 32px;border-radius:50px;color:#121212;font-weight:700;font-size:16px;cursor:pointer;font-family:inherit;width:100%;}
 .spin-btn:disabled{opacity:0.4;cursor:not-allowed;}
 .ticket-info{text-align:center;margin-top:8px;font-size:13px;color:#ffd700;font-weight:700;}
@@ -181,27 +200,30 @@ input:checked+.vip-slider:before{transform:translateX(20px);}
 /* ─── Toast ─── */
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(20,22,27,0.95);border:1px solid rgba(255,215,0,0.3);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;pointer-events:none;transition:opacity 0.3s;z-index:5000;white-space:nowrap;}
 .toast.show{opacity:1;}
+
 /* ─── Coin Clicker Game ─── */
-.cc-wrap{background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.15);border-radius:20px;padding:16px;margin-bottom:12px;}
-.cc-game-area{position:relative;width:100%;height:320px;border-radius:20px;background:rgba(0,0,0,0.4);overflow:hidden;margin-bottom:12px;cursor:pointer;}
-.cc-objects-container{position:relative;width:100%;height:100%;}
-.cc-object{position:absolute;font-size:34px;cursor:pointer;user-select:none;-webkit-user-select:none;pointer-events:auto;z-index:10;animation:ccFlip 1s linear infinite;}
-@keyframes ccFlip{0%{transform:rotateY(0deg);}100%{transform:rotateY(360deg);}}
-.cc-object:active{transform:scale(0.85);}
-.cc-stats{display:flex;justify-content:space-between;align-items:center;background:rgba(20,22,27,0.9);border-radius:16px;padding:12px 16px;border:1px solid rgba(255,215,0,0.15);}
-.cc-score{font-size:22px;font-weight:700;color:#ffd700;}
-.cc-timer{font-size:22px;font-weight:700;color:#fff;}
-.cc-timer.warning{color:#ff4444;animation:ccShake 0.2s infinite;}
-@keyframes ccShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-3px);}75%{transform:translateX(3px);}}
-.cc-start-btn{width:100%;padding:14px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:16px;color:#121212;font-weight:700;font-size:16px;cursor:pointer;font-family:inherit;margin-top:10px;}
-.cc-start-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.cc-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;border-radius:20px;}
-.cc-countdown{font-size:80px;font-weight:900;color:#ffd700;text-shadow:0 0 20px gold;}
-.cc-result-box{background:linear-gradient(145deg,#1e1e2e,#16161f);border:2px solid #ffd700;border-radius:24px;padding:20px;text-align:center;width:85%;}
-.cc-result-box h2{color:#ffd700;font-size:28px;margin-bottom:10px;}
-.cc-result-box p{font-size:16px;margin-bottom:16px;color:#e0e0f0;}
-.cc-popup-btn{width:100%;padding:12px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:30px;color:#121212;font-weight:700;font-size:14px;cursor:pointer;margin:5px 0;font-family:inherit;}
-.cc-popup-btn.secondary{background:transparent;border:1px solid rgba(255,215,0,0.3);color:#ffd700;}
+.clicker-wrap{background:rgba(20,22,27,0.9);border:1px solid rgba(255,215,0,0.2);border-radius:20px;padding:16px;margin-bottom:12px;text-align:center;}
+.clicker-coin{font-size:90px;cursor:pointer;user-select:none;transition:transform 0.08s;display:inline-block;filter:drop-shadow(0 0 20px rgba(255,215,0,0.5));-webkit-tap-highlight-color:transparent;}
+.clicker-coin:active{transform:scale(0.88);}
+.clicker-coin.bounce{animation:coinBounce 0.12s ease;}
+@keyframes coinBounce{0%{transform:scale(1);}50%{transform:scale(0.84);}100%{transform:scale(1);}}
+.clicker-info{display:flex;justify-content:space-around;margin:12px 0;background:rgba(255,255,255,0.04);border-radius:14px;padding:12px;}
+.clicker-stat{text-align:center;}
+.clicker-stat .val{font-size:20px;font-weight:800;color:#ffd700;}
+.clicker-stat .lbl{font-size:10px;color:#8e8e9d;margin-top:2px;}
+.clicker-energy-bar{height:8px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;margin:8px 0;}
+.clicker-energy-fill{height:100%;background:linear-gradient(90deg,#ffd700,#ff8c00);border-radius:8px;transition:width 0.2s;}
+.clicker-float{position:absolute;font-size:14px;font-weight:800;color:#ffd700;pointer-events:none;animation:floatUp 0.8s ease forwards;z-index:999;}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-60px);}}
+.clicker-level{font-size:12px;color:#ffd700;margin-bottom:6px;font-weight:700;}
+.clicker-upgrades{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.upgrade-btn{background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;transition:all 0.2s;font-family:inherit;}
+.upgrade-btn:hover{background:rgba(255,215,0,0.15);}
+.upgrade-btn.maxed{opacity:0.4;cursor:not-allowed;}
+.upgrade-btn .ub-icon{font-size:20px;}
+.upgrade-btn .ub-name{font-size:11px;color:#e0e0f0;margin:4px 0 2px;}
+.upgrade-btn .ub-cost{font-size:11px;color:#ffd700;font-weight:700;}
+.upgrade-btn .ub-level{font-size:10px;color:#8e8e9d;}
     </style>
 </head>
 <body>
@@ -337,6 +359,43 @@ input:checked+.vip-slider:before{transform:translateX(20px);}
                 <div class="badge">⚡ Instant</div>
             </div>
         </div>
+        <!-- Coin Clicker Panel -->
+        <div class="clicker-wrap" id="clickerWrap" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-size:14px;font-weight:700;color:#ffd700;">🪙 Coin Clicker</div>
+                <button onclick="NC.games.closeClicker()" style="background:rgba(255,255,255,0.06);border:none;color:#8e8e9d;padding:4px 12px;border-radius:20px;cursor:pointer;font-family:inherit;">✕ Back</button>
+            </div>
+            <div class="clicker-level" id="clickerLevel">Level 1 — Beginner</div>
+            <div class="clicker-info">
+                <div class="clicker-stat"><div class="val" id="clickerCoinsEarned">0</div><div class="lbl">Session Coins</div></div>
+                <div class="clicker-stat"><div class="val" id="clickerCoinPerTap">+1</div><div class="lbl">Per Tap</div></div>
+                <div class="clicker-stat"><div class="val" id="clickerEnergy">100</div><div class="lbl">Energy</div></div>
+            </div>
+            <div class="clicker-energy-bar"><div class="clicker-energy-fill" id="clickerEnergyBar" style="width:100%"></div></div>
+            <div style="position:relative;display:inline-block;">
+                <div class="clicker-coin" id="clickerCoin" onclick="NC.games.clicker.tap(event)">🪙</div>
+            </div>
+            <div class="clicker-upgrades">
+                <div class="upgrade-btn" id="upg0" onclick="NC.games.clicker.upgrade(0)">
+                    <div class="ub-icon">⚡</div><div class="ub-name">Tap Power</div>
+                    <div class="ub-cost" id="upg0cost">50🪙</div><div class="ub-level" id="upg0lv">Lv 1</div>
+                </div>
+                <div class="upgrade-btn" id="upg1" onclick="NC.games.clicker.upgrade(1)">
+                    <div class="ub-icon">🔋</div><div class="ub-name">Max Energy</div>
+                    <div class="ub-cost" id="upg1cost">80🪙</div><div class="ub-level" id="upg1lv">Lv 1</div>
+                </div>
+                <div class="upgrade-btn" id="upg2" onclick="NC.games.clicker.upgrade(2)">
+                    <div class="ub-icon">⚡️</div><div class="ub-name">Energy Regen</div>
+                    <div class="ub-cost" id="upg2cost">60🪙</div><div class="ub-level" id="upg2lv">Lv 1</div>
+                </div>
+                <div class="upgrade-btn" id="upg3" onclick="NC.games.clicker.upgrade(3)">
+                    <div class="ub-icon">🌟</div><div class="ub-name">Auto Tap</div>
+                    <div class="ub-cost" id="upg3cost">200🪙</div><div class="ub-level" id="upg3lv">OFF</div>
+                </div>
+            </div>
+            <button style="width:100%;padding:12px;background:linear-gradient(135deg,#3cba92,#0ba360);border:none;border-radius:14px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;margin-top:12px;font-family:inherit;" onclick="NC.games.clicker.cashOut()">💰 Cash Out & Save</button>
+        </div>
+
         <!-- Lucky Wheel Panel -->
         <div class="lw-wrap" id="lwWrap" style="display:none;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -352,8 +411,12 @@ input:checked+.vip-slider:before{transform:translateX(20px);}
             <div class="lw-panel active" id="lwPanelSpin">
                 <div class="wheel-container">
                     <div class="wheel-pointer">▼</div>
-                    <canvas class="wheel-canvas" id="lwWheelCanvas" width="280" height="280"></canvas>
-                    <div class="wheel-center">🪙</div>
+                    <div class="wheel" id="lwWheel">
+                        <div class="wheel-label" id="lwWheelLabel">
+                            <!-- JS will place labels -->
+                        </div>
+                        <div class="wheel-center">🪙</div>
+                    </div>
                 </div>
                 <button class="spin-btn" id="lwSpinBtn" onclick="NC.games.lw.spin()">🎰 Spin</button>
                 <div class="ticket-info" id="lwTicketInfo">🎟️ Tickets: 0</div>
@@ -382,35 +445,6 @@ input:checked+.vip-slider:before{transform:translateX(20px);}
             </div>
         </div>
         <button class="earn-invite-btn" onclick="NC.shareInvite()" style="margin-top:8px;">👥 သူငယ်ချင်းများကိုဖိတ်ပြီး 50🪙 ရယူလိုက်ပါ</button>
-
-        <!-- Coin Clicker Panel -->
-        <div class="cc-wrap" id="ccWrap" style="display:none;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <div style="font-size:14px;font-weight:700;color:#ffd700;">🪙 Coin Clicker</div>
-                <button onclick="NC.games.closeCoinClicker()" style="background:rgba(255,255,255,0.06);border:none;color:#8e8e9d;padding:4px 12px;border-radius:20px;cursor:pointer;font-family:inherit;">✕ Back</button>
-            </div>
-            <div class="cc-game-area" id="ccGameArea">
-                <div class="cc-objects-container" id="ccContainer"></div>
-                <!-- Countdown overlay -->
-                <div class="cc-overlay" id="ccCountdownOverlay" style="display:none;">
-                    <div class="cc-countdown" id="ccCountdown">3</div>
-                </div>
-                <!-- Result overlay -->
-                <div class="cc-overlay" id="ccResultOverlay" style="display:none;">
-                    <div class="cc-result-box">
-                        <h2 id="ccResultTitle">🎉 အောင်မြင်!</h2>
-                        <p id="ccResultMsg">သင် 45🪙 ရပြီ!</p>
-                        <button class="cc-popup-btn" id="ccWatchAdBtn" onclick="NC.games.cc.watchAdContinue()">📺 Ad ကြည့်ပြီး ဆက်ဆော့</button>
-                        <button class="cc-popup-btn secondary" onclick="NC.games.cc.quit()">🚪 ထွက်မည်</button>
-                    </div>
-                </div>
-            </div>
-            <div class="cc-stats">
-                <div class="cc-score">💰 <span id="ccScore">0.0</span></div>
-                <div class="cc-timer" id="ccTimerEl">⏱️ <span id="ccTimerDisplay">38</span>s</div>
-            </div>
-            <button class="cc-start-btn" id="ccStartBtn" onclick="NC.games.cc.start()">🎮 ကစားရန် (50🪙 ကျသင့်မည်)</button>
-        </div>
     </div>
 
     <!-- ══════ PROFILE PAGE ══════ -->
@@ -457,7 +491,6 @@ input:checked+.vip-slider:before{transform:translateX(20px);}
         </div>
         <input class="form-input" id="phoneInput" placeholder="ဖုန်းနံပါတ် သို့မဟုတ် Wallet Address" type="text">
         <input class="form-input" id="amountInput" placeholder="ထုတ်မည့် ပမာဏ (coins)" type="number">
-        <p id="minWithdrawHint" style="font-size:11px;color:#ffd700;margin:-8px 0 10px;text-align:center;"></p>
         <input class="form-input" id="accountNameInput" placeholder="အကောင့်အမည်" type="text">
         <button class="submit-btn" onclick="NC.submitWithdrawal()">💸 ထုတ်ရန်တောင်းဆိုပါ</button>
     </div>
@@ -550,50 +583,26 @@ function setAvatar(elId, url) {
 async function fetchUser() {
     try {
         const r = await fetch(`${API}/user`, { headers });
-        if (r.status === 503) {
-            // Maintenance mode
-            const d = await r.json();
-            document.getElementById('appContainer').style.display = 'none';
-            document.getElementById('vpnPage').classList.add('active');
-            document.getElementById('vpnIcon').textContent = '🔧';
-            document.querySelector('#vpnPage h2').textContent = '🔧 Maintenance';
-            document.querySelector('#vpnPage p').innerHTML = d.error || 'ဆာဗာကို ပြင်ဆင်နေသည်။ ခဏစောင့်ပါ။';
-            document.getElementById('vpnLocationText').textContent = '';
-            document.getElementById('vpnCheckBtn').style.display = 'none';
-            return;
-        }
         if (!r.ok) return;
-        const prev = _user;
         _user = await r.json();
         _renderHeader();
-        // Show free ticket toast for new users (first time only)
-        if (!prev && _user && _user.spinTickets >= 1 && !sessionStorage.getItem('nc_freeticket_shown')) {
-            sessionStorage.setItem('nc_freeticket_shown','1');
-            setTimeout(() => toast('🎟️ ပထမဆုံး Free Ticket 1 ခု ရပြီ! Lucky Wheel ဆော့ကြည့်ပါ 🎰', 4000), 1500);
-        }
     } catch(e) {}
 }
 
 function _renderHeader() {
     if (!_user) return;
-    const isMmk = _cfg.CURRENCY_MODE === 'mmk';
-    const coins = (_user.coins||0).toLocaleString();
-    document.getElementById('totalCoins').textContent = coins;
+    const sym = _cfg.CURRENCY_MODE === 'mmk' ? '' : '';
+    document.getElementById('totalCoins').textContent = (_user.coins||0).toLocaleString();
     document.getElementById('welcomeUsername').textContent = '@' + (_user.username || _user.firstName || 'user');
     setAvatar('headerAvatar', _user.photoUrl);
-    // Currency symbols
-    document.getElementById('coinSymbolLeft').style.display  = isMmk ? 'none' : '';
-    document.getElementById('coinSymbolRight').style.display = isMmk ? '' : 'none';
     // Home task buttons state
     _updateHomeTaskButtons();
 }
 
 function _renderProfile() {
     if (!_user) return;
-    const isMmk = _cfg.CURRENCY_MODE === 'mmk';
     document.getElementById('profileUsername').textContent = '@' + (_user.username || _user.firstName || 'user');
     document.getElementById('profileCoins').textContent = (_user.coins||0).toLocaleString();
-    document.getElementById('profileCoinSymbol').textContent = isMmk ? 'ကျပ်' : '🪙';
     document.getElementById('referralCount').textContent = _user.referralCount || 0;
     if (_user.createdAt) {
         document.getElementById('joinDate').textContent = new Date(_user.createdAt).toLocaleDateString();
@@ -608,55 +617,31 @@ async function fetchConfig() {
         if (!r.ok) return;
         _cfg = await r.json();
 
-        const isMmk = _cfg.CURRENCY_MODE === 'mmk';
-        const vipVisible = _cfg.VIP_CARD_VISIBLE !== false && _cfg.VIP_CARD_VISIBLE !== 'false';
-
         // VIP card visibility
         const vipRow = document.getElementById('vipToggleRow');
         if (vipRow) {
             vipRow.style.visibility = '';
-            vipRow.style.display = vipVisible ? '' : 'none';
+            vipRow.style.display = _cfg.VIP_CARD_VISIBLE === false ? 'none' : '';
         }
-
-        // Currency mode — header balance
+        // Currency
+        const isMmk = _cfg.CURRENCY_MODE === 'mmk';
         document.getElementById('coinSymbolLeft').style.display  = isMmk ? 'none' : '';
         document.getElementById('coinSymbolRight').style.display = isMmk ? '' : 'none';
-        document.getElementById('profileCoinSymbol').textContent = isMmk ? 'ကျပ်' : '🪙';
+        document.getElementById('profileCoinSymbol').textContent  = isMmk ? 'ကျပ်' : '🪙';
+        const reward = _cfg.REFERRAL_REWARD || 50;
+        document.getElementById('inviteRewardText').textContent   = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
 
-        // Referral reward text
-        const reward = Number(_cfg.REFERRAL_REWARD) || 50;
-        const earnInviteBtn = document.querySelector('.earn-invite-btn');
-        document.getElementById('inviteRewardText').textContent = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
-        if (earnInviteBtn) earnInviteBtn.textContent = isMmk
-            ? `👥 သူငယ်ချင်းများကိုဖိတ်ပြီး ${reward}ကျပ် ရယူလိုက်ပါ`
-            : `👥 သူငယ်ချင်းများကိုဖိတ်ပြီး ${reward}🪙 ရယူလိုက်ပါ`;
-
-        // Withdrawal button — show min withdrawal amount
-        const minW = Number(_cfg.MIN_WITHDRAWAL) || 100000;
-        const wdBtns = document.querySelectorAll('#homeWithdrawBtn, #profileWithdrawBtn');
-        wdBtns.forEach(btn => {
-            if (btn) btn.title = `Minimum: ${minW.toLocaleString()} coins`;
-        });
-
-        // Home task labels
-        const s = (id,v) => { const e=document.getElementById(id); if(e && v != null) e.textContent=v; };
+        // Task labels
+        const s = (id,v) => { const e=document.getElementById(id); if(e&&v) e.textContent=v; };
         s('dailyCheckinLabel',      _cfg.DAILY_CHECKIN_LABEL);
         s('dailyCheckinRewardLabel',_cfg.DAILY_CHECKIN_REWARD_LABEL);
         s('task1Label',_cfg.TASK1_LABEL); s('task1RewardLabel',_cfg.TASK1_REWARD_LABEL);
         s('task2Label',_cfg.TASK2_LABEL); s('task2RewardLabel',_cfg.TASK2_REWARD_LABEL);
         s('task3Label',_cfg.TASK3_LABEL); s('task3RewardLabel',_cfg.TASK3_REWARD_LABEL);
         s('task4Label',_cfg.TASK4_LABEL); s('task4RewardLabel',_cfg.TASK4_REWARD_LABEL);
-        // Button labels (only update if not showing cooldown)
-        const b = (id,v) => {
-            const e=document.getElementById(id);
-            if(e && v != null && !e.disabled && !e.textContent.includes('⏳') && !e.textContent.includes('✅'))
-                e.textContent=v;
-        };
+        const b = (id,v) => { const e=document.getElementById(id); if(e&&v&&!e.disabled&&!e.textContent.includes('⏳')&&!e.textContent.includes('✅')) e.textContent=v; };
         b('task1Btn',_cfg.TASK1_BTN_LABEL); b('task2Btn',_cfg.TASK2_BTN_LABEL);
         b('task3Btn',_cfg.TASK3_BTN_LABEL); b('task4Btn',_cfg.TASK4_BTN_LABEL);
-
-        // Earn tab labels — refresh earn grid if initialized
-        if (typeof earn !== 'undefined') earn._applyLabels?.();
 
     } catch(e) { console.error('config',e); }
 }
@@ -664,7 +649,7 @@ async function fetchConfig() {
 // ─── VPN Gate ─────────────────────────────────────────────────
 const vpn = {
     async init() {
-        const vpnOn = _cfg.VPN_MODE !== false && _cfg.VPN_MODE !== 'false'; if (!vpnOn) { this._allow(); return; }
+        if (_cfg.VPN_MODE === false) { this._allow(); return; }
         document.getElementById('vpnPage').classList.add('active');
         await this.check();
     },
@@ -681,7 +666,7 @@ const vpn = {
                 document.getElementById('vpnIcon').textContent = '✅';
                 setTimeout(() => this._allow(), 1200);
             } else {
-                loc.textContent = (d.country||'Unknown') + ' ❌ — VPN ချိတ်ဆက်ပြီး ထပ်စစ်ဆေးပါ';
+                loc.textContent = (d.country||'Unknown') + ' ❌';
                 document.getElementById('vpnIcon').textContent = '❌';
                 btn.disabled = false;
                 btn.textContent = '🔄 ထပ်စစ်ဆေးပါ';
@@ -922,116 +907,50 @@ const earn = (() => {
 const games = (() => {
     function openLuckyWheel() {
         document.getElementById('lwWrap').style.display = '';
-        document.getElementById('ccWrap').style.display = 'none';
         lw._refresh();
-        lw._drawWheel(0);
     }
     function closeLuckyWheel() { document.getElementById('lwWrap').style.display = 'none'; }
-    function openCoinClicker() {
-        document.getElementById('ccWrap').style.display = '';
-        document.getElementById('lwWrap').style.display = 'none';
-        cc._init();
-    }
-    function closeCoinClicker() {
-        cc._cleanup();
-        document.getElementById('ccWrap').style.display = 'none';
-    }
+    function openCoinClicker() { toast('🪙 Coin Clicker — Coming Soon!'); }
 
-    // ══════════════════════════════════════════
-    // Lucky Wheel sub-module (canvas-based)
-    // ══════════════════════════════════════════
+    // ── Wheel label init ──
+    (function _initWheelLabels() {
+        const labels = ['10','20','50','70','85','100','Free','Again'];
+        const el = document.getElementById('lwWheelLabel');
+        if (!el) return;
+        el.innerHTML = '';
+        labels.forEach((txt, i) => {
+            const angleDeg = i * 45 + 22.5; // center of each segment from top (conic-gradient from -90deg)
+            const angleRad = (angleDeg - 90) * Math.PI / 180;
+            const r = 36; // % from center
+            const x = 50 + r * Math.cos(angleRad);
+            const y = 50 + r * Math.sin(angleRad);
+            const div = document.createElement('div');
+            div.className = 'wl';
+            div.textContent = txt;
+            div.style.cssText = `position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%) rotate(${angleDeg}deg);font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.9);white-space:nowrap;`;
+            el.appendChild(div);
+        });
+    })();
+
+    // Lucky Wheel sub-module
     const lw = (() => {
+        // Prize order MUST match conic-gradient segment order (from -90deg, clockwise)
+        // idx: 0=10, 1=20, 2=50, 3=70, 4=85, 5=100, 6=Free, 7=TryAgain
+        const PRIZE_NAMES = ['10🪙','20🪙','50🪙','70🪙','85🪙','100🪙','🎟️ Free Spin','😅 Try Again'];
         let _tickets = 0;
         let _spinning = false;
-        let _currentDeg = 0;
+        let _deg = 0;
         let _adCount = 0;
         let _adCooldownEnd = 0;
         let _claimableRef = 0;
         let _refTotal = 0;
 
-        // Segments: must match backend PRIZES order exactly
-        // index 0..7 → 10,20,50,70,85,100,Free,TryAgain
-        const SEGMENTS = [
-            { label: '10',       color: '#ffd700' },
-            { label: '20',       color: '#ff8c00' },
-            { label: '50',       color: '#ff6b6b' },
-            { label: '70',       color: '#4ecdc4' },
-            { label: '85',       color: '#a8e6cf' },
-            { label: '100',      color: '#ffd3b6' },
-            { label: 'Free',     color: '#ffaaa5' },
-            { label: 'TryAgain', color: '#ff8b94' },
-        ];
-        const NUM_SEG = SEGMENTS.length;
-        const SEG_ANG = (2 * Math.PI) / NUM_SEG; // 45° each
-
-        function _drawWheel(rotateDeg) {
-            const canvas = document.getElementById('lwWheelCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const W = canvas.width, H = canvas.height;
-            const cx = W / 2, cy = H / 2;
-            const R = Math.min(cx, cy) - 6;
-            ctx.clearRect(0, 0, W, H);
-
-            const startOffset = -Math.PI / 2; // top = 0°
-            const rotRad = (rotateDeg * Math.PI) / 180;
-
-            // Draw border ring
-            ctx.beginPath();
-            ctx.arc(cx, cy, R + 4, 0, 2 * Math.PI);
-            ctx.fillStyle = '#222';
-            ctx.fill();
-
-            for (let i = 0; i < NUM_SEG; i++) {
-                const startAngle = startOffset + rotRad + i * SEG_ANG;
-                const endAngle = startAngle + SEG_ANG;
-
-                // Fill segment
-                ctx.beginPath();
-                ctx.moveTo(cx, cy);
-                ctx.arc(cx, cy, R, startAngle, endAngle);
-                ctx.closePath();
-                ctx.fillStyle = SEGMENTS[i].color;
-                ctx.fill();
-
-                // Segment border
-                ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Label
-                ctx.save();
-                const midAngle = startAngle + SEG_ANG / 2;
-                const labelR = R * 0.68;
-                const lx = cx + labelR * Math.cos(midAngle);
-                const ly = cy + labelR * Math.sin(midAngle);
-                ctx.translate(lx, ly);
-                ctx.rotate(midAngle + Math.PI / 2);
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const label = SEGMENTS[i].label;
-                const isLong = label.length > 4;
-                ctx.font = `bold ${isLong ? 9 : 11}px Inter, sans-serif`;
-                ctx.fillStyle = '#121212';
-                ctx.shadowColor = 'rgba(255,255,255,0.4)';
-                ctx.shadowBlur = 2;
-                ctx.fillText(label, 0, 0);
-                ctx.restore();
-            }
-
-            // Outer ring glow
-            ctx.beginPath();
-            ctx.arc(cx, cy, R, 0, 2 * Math.PI);
-            ctx.strokeStyle = 'rgba(255,215,0,0.5)';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-        }
-
         function showTab(tab) {
-            ['spin','ad','invite'].forEach(t => {
-                const key = t[0].toUpperCase() + t.slice(1);
-                document.getElementById('lwTab'+key).classList.toggle('active', t===tab);
-                document.getElementById('lwPanel'+key).classList.toggle('active', t===tab);
+            ['Spin','Ad','Invite'].forEach(t => {
+                const tabEl = document.getElementById('lwTab'+t);
+                const panEl = document.getElementById('lwPanel'+t);
+                if(tabEl) tabEl.classList.toggle('active', t.toLowerCase()===tab);
+                if(panEl) panEl.classList.toggle('active', t.toLowerCase()===tab);
             });
         }
 
@@ -1039,6 +958,7 @@ const games = (() => {
             if (!document.getElementById('lwWrap') || document.getElementById('lwWrap').style.display==='none') return;
             try {
                 const r = await fetch(`${API}/games/wheel-status`, { headers });
+                if (!r.ok) return;
                 const d = await r.json();
                 if (!d.success) return;
                 _tickets = d.spinTickets||0;
@@ -1047,86 +967,100 @@ const games = (() => {
                 _claimableRef = d.claimableReferralTickets||0;
                 _refTotal = d.totalReferrals||0;
                 _updateUI();
-            } catch(e) {}
+            } catch(e) { console.error('wheel refresh error:', e); }
         }
 
         function _updateUI() {
-            document.getElementById('lwTicketInfo').textContent = `🎟️ Tickets: ${_tickets}`;
-            document.getElementById('lwSpinBtn').disabled = _tickets<=0 || _spinning;
-            const adPct = Math.min(_adCount/5,1)*100;
-            document.getElementById('lwAdCount').textContent = `${Math.min(_adCount,5)} / 5`;
-            document.getElementById('lwAdProgress').style.width = adPct+'%';
+            const ticketEl = document.getElementById('lwTicketInfo');
+            if (ticketEl) ticketEl.textContent = `🎟️ Tickets: ${_tickets}`;
+            const spinBtn = document.getElementById('lwSpinBtn');
+            if (spinBtn) spinBtn.disabled = _tickets<=0 || _spinning;
+
+            // Ad panel
+            const adPct = Math.min(_adCount/5, 1)*100;
+            const adCountEl = document.getElementById('lwAdCount');
+            if (adCountEl) adCountEl.textContent = `${Math.min(_adCount,5)} / 5`;
+            const adProgEl = document.getElementById('lwAdProgress');
+            if (adProgEl) adProgEl.style.width = adPct+'%';
             const canClaim = _adCount>=5 && Date.now()>_adCooldownEnd;
-            document.getElementById('lwAdClaimBtn').disabled = !canClaim;
+            const adClaimBtn = document.getElementById('lwAdClaimBtn');
+            if (adClaimBtn) adClaimBtn.disabled = !canClaim;
+
+            // Invite panel
+            const used = _refTotal % 5 || (_claimableRef ? 5 : 0);
             const refForNext = Math.max(0, 5 - (_refTotal%5));
-            document.getElementById('lwInviteCount').textContent = `${_refTotal%5||(_claimableRef?5:0)} / 5`;
-            document.getElementById('lwInviteProgress').style.width = Math.min((_refTotal%5)/5,1)*100+'%';
-            document.getElementById('lwRefClaimBtn').disabled = _claimableRef<=0;
-            document.getElementById('lwInviteMsg').textContent = _claimableRef>0 ? `🎟️ ${_claimableRef} ticket claim လုပ်နိုင်ပြီ!` : `သူငယ်ချင်း ${refForNext} ယောက်ထပ်ဖိတ်ရင် ticket ရမည်`;
+            const invCountEl = document.getElementById('lwInviteCount');
+            if (invCountEl) invCountEl.textContent = `${used} / 5`;
+            const invProgEl = document.getElementById('lwInviteProgress');
+            if (invProgEl) invProgEl.style.width = (used/5*100)+'%';
+            const refClaimBtn = document.getElementById('lwRefClaimBtn');
+            if (refClaimBtn) refClaimBtn.disabled = _claimableRef<=0;
+            const invMsgEl = document.getElementById('lwInviteMsg');
+            if (invMsgEl) invMsgEl.textContent = _claimableRef>0
+                ? `🎟️ ${_claimableRef} ticket claim လုပ်နိုင်ပြီ!`
+                : `သူငယ်ချင်း ${refForNext} ယောက်ထပ်ဖိတ်ရင် ticket ရမည်`;
         }
 
         async function spin() {
             if (_spinning || _tickets<=0) return;
             _spinning = true;
-            document.getElementById('lwSpinBtn').disabled = true;
+            const spinBtn = document.getElementById('lwSpinBtn');
+            if (spinBtn) spinBtn.disabled = true;
             try {
                 const r = await fetch(`${API}/games/spin`, { method:'POST', headers });
                 const d = await r.json();
-                if (!d.success) { toast('❌ '+(d.error||'Error')); _spinning=false; _updateUI(); return; }
-
-                const idx = d.prizeIndex ?? 0;
-                // Each segment is 45°. Pointer is at top (0°).
-                // Segment idx starts from top going clockwise.
-                // To land segment idx under pointer: wheel must rotate so segment idx center is at top.
-                // center of segment idx from top = idx * 45 + 22.5 degrees
-                // We need that position to be at 0° (top), so rotate = 360 - (idx*45 + 22.5) + 360*N
-                const segCenter = idx * 45 + 22.5;
-                const currentMod = _currentDeg % 360;
-                let delta = ((360 - segCenter) - currentMod + 360) % 360;
-                if (delta < 45) delta += 360;
-                const totalDeg = _currentDeg + delta + 360 * 5;
-
-                // Animate canvas wheel
-                const startDeg = _currentDeg;
-                const duration = 4000;
-                const startTime = performance.now();
-                function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
-
-                function animFrame(now) {
-                    const elapsed = now - startTime;
-                    const t = Math.min(elapsed / duration, 1);
-                    const cur = startDeg + (totalDeg - startDeg) * easeOut(t);
-                    _drawWheel(cur);
-                    if (t < 1) {
-                        requestAnimationFrame(animFrame);
-                    } else {
-                        _currentDeg = totalDeg;
-                        _spinning = false;
-                        _tickets = d.newTickets ?? Math.max(0, _tickets - 1);
-                        _updateUI();
-                        fetchUser();
-                        // Show result
-                        const pName = d.prize || '';
-                        if (d.type === 'tryagain') showAlert('😅 Try Again!', 'ကံမကောင်းဘူး၊ နောက်တစ်ကြိမ် ထပ်ကြိုးစားပါ!');
-                        else if (d.type === 'freespin') showAlert('🎟️ Free Spin!', '+1 Free Ticket ရပြီ!');
-                        else showAlert('🎉 ဂုဏ်ယူပါတယ်!', `${pName} ရပြီ!`);
-                    }
+                if (!r.ok || !d.prizeIndex === undefined) {
+                    toast('❌ '+(d.error||'Spin failed'));
+                    _spinning = false;
+                    if (spinBtn) spinBtn.disabled = false;
+                    return;
                 }
-                requestAnimationFrame(animFrame);
-
-            } catch(e) { toast('❌ Error'); _spinning=false; _updateUI(); }
+                const idx = d.prizeIndex ?? 0;
+                // Pointer at top = 12 o'clock. conic-gradient starts from -90deg (top).
+                // Segment i center is at: i*45 + 22.5 degrees from top (clockwise)
+                // To land segment i under pointer: rotate wheel so segment i goes to top
+                // Total rotation needed = -(i*45 + 22.5) mod 360
+                // In positive rotation (clockwise): 360 - (i*45 + 22.5)
+                const segCenter = idx * 45 + 22.5;
+                const targetAngle = (360 - segCenter % 360) % 360;
+                const currentMod = _deg % 360;
+                let delta = (targetAngle - currentMod + 360) % 360;
+                if (delta < 45) delta += 360; // ensure visible spin
+                const totalRotation = _deg + delta + 360 * 6;
+                _deg = totalRotation;
+                const wheelEl = document.getElementById('lwWheel');
+                if (wheelEl) wheelEl.style.transform = `rotate(${totalRotation}deg)`;
+                setTimeout(() => {
+                    const prizeName = PRIZE_NAMES[idx] || '???';
+                    if (d.type === 'tryagain') {
+                        showAlert('😅 Try Again!', 'ကံမကောင်းပါဘူး — နောက်တစ်ကြိမ် ထပ်ကြိုးစားပါ!');
+                    } else if (d.type === 'freespin') {
+                        showAlert('🎟️ Free Spin ရပြီ!', '+1 Ticket ရပါပြီ! ဆက်လည်ပါ!');
+                    } else {
+                        showAlert('🎉 ဂုဏ်ယူပါသည်!', `${prizeName} ရပါပြီ!`);
+                    }
+                    _spinning = false;
+                    _tickets = d.newTickets || 0;
+                    _updateUI();
+                    fetchUser();
+                }, 4300);
+            } catch(e) {
+                toast('❌ Spin error');
+                _spinning = false;
+                if (spinBtn) spinBtn.disabled = false;
+            }
         }
 
         async function watchAd() {
             try {
                 const AdController = await window.Adsgram?.init({ blockId:'5183' });
-                AdController.show().then(async()=>{
+                AdController.show().then(async () => {
                     const r = await fetch(`${API}/games/watch-ad`, { method:'POST', headers });
                     const d = await r.json();
                     toast(d.success ? '✅ Ad ကြည့်ပြီ!' : '❌ '+(d.error||'Error'));
                     _refresh();
-                }).catch(()=>toast('❌ Ad မပြနိုင်ပါ'));
-            } catch(e) { toast('❌ Error'); }
+                }).catch(() => toast('❌ Ad မပြနိုင်ပါ'));
+            } catch(e) { toast('❌ Ad Error'); }
         }
 
         async function claimAdTicket() {
@@ -1147,288 +1081,174 @@ const games = (() => {
             } catch(e) { toast('❌ Error'); }
         }
 
-        return { showTab, spin, watchAd, claimAdTicket, claimRefTicket, _refresh, _drawWheel };
+        return { showTab, spin, watchAd, claimAdTicket, claimRefTicket, _refresh };
     })();
 
-    // ══════════════════════════════════════════
-    // Coin Clicker sub-module
-    // ══════════════════════════════════════════
-    const cc = (() => {
-        const ENTRY_FEE = 50;
-        const MAX_SCORE = 100;
-        const GAME_DURATION = 38;
+    // ── Coin Clicker Game ──
+    const clicker = (() => {
+        const MAX_UPGRADES = 5;
+        let _sessionCoins = 0;
+        let _energy = 100;
+        let _maxEnergy = 100;
+        let _tapPower = 1;
+        let _regenRate = 1; // per second
+        let _autoTap = false;
+        let _autoInterval = null;
+        let _regenInterval = null;
+        let _upgLevels = [0, 0, 0, 0]; // tapPower, maxEnergy, regenRate, autoTap
+        let _active = false;
 
-        let _state = 'idle'; // idle | countdown | playing | paused | gameover
-        let _score = 0;
-        let _timeLeft = GAME_DURATION;
-        let _objects = [];
-        let _animFrame = null;
-        let _timerInterval = null;
-        let _lastSpawn = 0;
-        let _isStarting = false;
-        let _audioCtx = null;
+        const UPGRADES = [
+            { name:'Tap Power',   icon:'⚡',  baseCost:50,  costMul:1.8, maxLv:5 },
+            { name:'Max Energy',  icon:'🔋',  baseCost:80,  costMul:2.0, maxLv:5 },
+            { name:'Energy Regen',icon:'♻️', baseCost:60,  costMul:1.7, maxLv:5 },
+            { name:'Auto Tap',    icon:'🌟',  baseCost:200, costMul:3.0, maxLv:1 },
+        ];
 
-        function _getSpawnInterval() {
-            if (_score >= 80) return 200;
-            if (_score >= 60) return 300;
-            return 400;
-        }
-        function _getBombProb() {
-            if (_score >= 90) return 0.6;
-            if (_score >= 80) return 0.5;
-            if (_score >= 70) return 0.4;
-            if (_score >= 60) return 0.3;
-            return 0.15;
-        }
-        function _getSpeed() {
-            if (_score >= 80) return 3.5;
-            if (_score >= 60) return 2.5;
-            return 1.8;
-        }
-        function _coinValue() {
-            const r = Math.random();
-            if (r < 0.4) return 1.0;
-            if (r < 0.7) return 0.5;
-            return 0.2;
-        }
-        function _playTick() {
-            try {
-                if (!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-                if (_audioCtx.state === 'suspended') _audioCtx.resume();
-                const osc = _audioCtx.createOscillator();
-                const gain = _audioCtx.createGain();
-                osc.type = 'sine'; osc.frequency.value = 880;
-                gain.gain.value = 0.08;
-                osc.connect(gain); gain.connect(_audioCtx.destination);
-                osc.start(); osc.stop(_audioCtx.currentTime + 0.08);
-            } catch(e) {}
+        const LEVELS = ['Beginner','Apprentice','Journeyman','Expert','Master','Legend'];
+
+        function _upgCost(i) {
+            return Math.floor(UPGRADES[i].baseCost * Math.pow(UPGRADES[i].costMul, _upgLevels[i]));
         }
 
-        function _clearObjects() {
-            _objects.forEach(o => { if (o.el.parentNode) o.el.parentNode.removeChild(o.el); });
-            _objects = [];
-        }
+        function _updateUI() {
+            document.getElementById('clickerCoinsEarned').textContent = _sessionCoins;
+            document.getElementById('clickerCoinPerTap').textContent  = '+'+_tapPower;
+            document.getElementById('clickerEnergy').textContent      = Math.floor(_energy);
+            const pct = (_energy / _maxEnergy) * 100;
+            document.getElementById('clickerEnergyBar').style.width   = pct + '%';
+            const lv = Math.min(Math.floor(_sessionCoins / 100), 5);
+            document.getElementById('clickerLevel').textContent        = `Level ${lv+1} — ${LEVELS[lv]}`;
 
-        function _spawnObject() {
-            const container = document.getElementById('ccContainer');
-            if (!container) return;
-            const isBomb = _state === 'playing' && Math.random() < _getBombProb();
-            const value = isBomb ? 0 : _coinValue();
-            const el = document.createElement('div');
-            el.className = 'cc-object';
-            el.textContent = isBomb ? '💣' : '🪙';
-            const maxX = container.clientWidth - 44;
-            el.style.left = Math.max(0, Math.random() * maxX) + 'px';
-            el.style.top = '-50px';
-            el.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                if (_state !== 'playing') return;
-                if (isBomb) {
-                    _state = 'paused';
-                    clearInterval(_timerInterval);
-                    _showResult('bomb');
-                } else {
-                    _score = Math.min(_score + value, MAX_SCORE);
-                    document.getElementById('ccScore').textContent = _score.toFixed(1);
-                    _playTick();
-                    el.style.opacity = '0';
-                    setTimeout(() => {
-                        const i = _objects.findIndex(o => o.el === el);
-                        if (i !== -1) { if(el.parentNode) el.parentNode.removeChild(el); _objects.splice(i,1); }
-                    }, 80);
-                }
+            UPGRADES.forEach((u, i) => {
+                const cost = _upgCost(i);
+                const maxed = _upgLevels[i] >= u.maxLv;
+                const btn = document.getElementById('upg'+i);
+                if (!btn) return;
+                btn.className = 'upgrade-btn' + (maxed ? ' maxed' : '');
+                document.getElementById('upg'+i+'cost').textContent = maxed ? 'MAX' : cost+'🪙';
+                document.getElementById('upg'+i+'lv').textContent   = maxed
+                    ? (i===3 ? 'ACTIVE' : 'MAX')
+                    : (i===3 ? 'OFF' : `Lv ${_upgLevels[i]+1}`);
             });
-            container.appendChild(el);
-            _objects.push({ el, y: -50, isBomb, value });
         }
 
-        function _gameLoop(ts) {
-            if (_state === 'idle' || _state === 'gameover') return;
-            const container = document.getElementById('ccContainer');
-            if (!container) return;
-            const h = container.clientHeight || 320;
+        function _spawnFloat(x, y, val) {
+            const el = document.createElement('div');
+            el.className = 'clicker-float';
+            el.textContent = '+' + val + '🪙';
+            el.style.cssText = `left:${x}px;top:${y}px;`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 900);
+        }
 
-            // Spawn
-            if (_state === 'playing' || _state === 'countdown') {
-                const interval = _state === 'countdown' ? 800 : _getSpawnInterval();
-                if (ts - _lastSpawn > interval && _objects.length < 25) {
-                    _spawnObject(); _lastSpawn = ts;
-                }
+        function tap(e) {
+            if (!_active || _energy < 1) return;
+            const coin = document.getElementById('clickerCoin');
+            coin.classList.remove('bounce');
+            void coin.offsetWidth;
+            coin.classList.add('bounce');
+            _energy = Math.max(0, _energy - 1);
+            _sessionCoins += _tapPower;
+            _updateUI();
+            // Float label
+            const rect = coin.getBoundingClientRect();
+            const ex = (e?.clientX || rect.left + rect.width/2) - 20;
+            const ey = (e?.clientY || rect.top) - 60;
+            _spawnFloat(ex, ey, _tapPower);
+            if (_energy <= 0) toast('🔋 Energy ကုန်ပြီ — ခဏစောင့်ပါ');
+        }
+
+        function upgrade(i) {
+            if (_upgLevels[i] >= UPGRADES[i].maxLv) return;
+            const cost = _upgCost(i);
+            if (!_user || _user.coins < cost) { toast(`❌ Coins မလုံသေးပါ (${cost}🪙 လိုသည်)`); return; }
+            // Deduct from local _user
+            _user.coins -= cost;
+            _upgLevels[i]++;
+            // Recalculate stats
+            _tapPower   = 1 + _upgLevels[0] * 2;
+            _maxEnergy  = 100 + _upgLevels[1] * 50;
+            _regenRate  = 1 + _upgLevels[2] * 0.5;
+            if (_upgLevels[3] > 0 && !_autoTap) {
+                _autoTap = true;
+                _autoInterval = setInterval(() => { if (_active) tap(null); }, 800);
             }
-
-            // Move
-            const speed = _getSpeed();
-            for (let i = _objects.length - 1; i >= 0; i--) {
-                const o = _objects[i];
-                o.y += speed;
-                o.el.style.top = o.y + 'px';
-                if (o.y > h + 10) {
-                    if (o.el.parentNode) o.el.parentNode.removeChild(o.el);
-                    _objects.splice(i, 1);
-                }
-            }
-            _animFrame = requestAnimationFrame(_gameLoop);
+            // Update header coins display
+            document.getElementById('totalCoins').textContent = (_user.coins||0).toLocaleString();
+            toast(`✅ ${UPGRADES[i].name} upgraded!`);
+            _updateUI();
+            // Save upgrade cost to backend
+            fetch(`${API}/games/clicker-upgrade`, {
+                method: 'POST', headers,
+                body: JSON.stringify({ cost, upgradeId: i, level: _upgLevels[i] })
+            }).catch(()=>{});
         }
 
-        function _showCountdown(cb) {
-            const overlay = document.getElementById('ccCountdownOverlay');
-            const el = document.getElementById('ccCountdown');
-            overlay.style.display = 'flex';
-            let count = 3;
-            el.textContent = count;
-            const iv = setInterval(() => {
-                count--;
-                if (count > 0) { el.textContent = count; }
-                else if (count === 0) { el.textContent = 'GO!'; }
-                else { clearInterval(iv); overlay.style.display = 'none'; cb(); }
-            }, 1000);
-        }
-
-        function _startTimer() {
-            _timerInterval = setInterval(() => {
-                _timeLeft--;
-                document.getElementById('ccTimerDisplay').textContent = _timeLeft;
-                const timerEl = document.getElementById('ccTimerEl');
-                if (_timeLeft <= 5) { timerEl.classList.add('warning'); _playTick(); }
-                else timerEl.classList.remove('warning');
-                if (_timeLeft <= 0) { clearInterval(_timerInterval); _endGame(); }
-            }, 1000);
-        }
-
-        function _endGame() {
-            _state = 'gameover';
-            if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
-            clearInterval(_timerInterval);
-            _clearObjects();
-            _showResult('win');
-        }
-
-        function _showResult(reason) {
-            const overlay = document.getElementById('ccResultOverlay');
-            const title = document.getElementById('ccResultTitle');
-            const msg = document.getElementById('ccResultMsg');
-            const adBtn = document.getElementById('ccWatchAdBtn');
-            overlay.style.display = 'flex';
-            if (reason === 'win') {
-                title.textContent = '🎉 အောင်မြင်!';
-                msg.textContent = `သင် ${_score.toFixed(1)}🪙 ရပြီ!`;
-                adBtn.style.display = 'none';
-                // Submit score
-                _submitScore(_score);
-            } else if (reason === 'bomb') {
-                title.textContent = '💣 BOOM!';
-                msg.textContent = 'ဗုံးနှိပ်မိပြီ! Ad ကြည့်ပြီး ဆက်ဆော့မည်လား?';
-                adBtn.style.display = 'block';
-            }
-        }
-
-        async function _submitScore(earned) {
+        async function cashOut() {
+            if (_sessionCoins <= 0) { toast('탭하여 먼저 코인을 모으세요'); return; }
             try {
-                const r = await fetch(`${API}/games/coin-end`, {
+                const r = await fetch(`${API}/games/clicker-cashout`, {
                     method:'POST', headers,
-                    body: JSON.stringify({ earnedCoins: Math.min(earned, MAX_SCORE) })
+                    body: JSON.stringify({ coins: _sessionCoins })
                 });
                 const d = await r.json();
-                if (d.success) { await fetchUser(); toast(`✅ +${earned.toFixed(1)}🪙 balance ထည့်ပြီ!`); }
-            } catch(e) {}
+                if (d.success) {
+                    toast(`✅ ${_sessionCoins}🪙 ရပြီ!`);
+                    _sessionCoins = 0;
+                    _energy = _maxEnergy;
+                    await fetchUser();
+                    _updateUI();
+                } else {
+                    toast('❌ ' + (d.error||'Error'));
+                }
+            } catch(e) { toast('❌ Error'); }
         }
 
-        async function start() {
-            if (_isStarting) return;
-            if (!_user || _user.coins < ENTRY_FEE) {
-                toast(`❌ Coins ${ENTRY_FEE} မရှိပါ`);
-                return;
-            }
-            _isStarting = true;
-            const btn = document.getElementById('ccStartBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Loading...';
-            try {
-                const r = await fetch(`${API}/games/coin-start`, { method:'POST', headers });
-                const d = await r.json();
-                if (!r.ok) { toast('❌ '+(d.error||'Error')); btn.disabled=false; btn.textContent=`🎮 ကစားရန် (${ENTRY_FEE}🪙 ကျသင့်မည်)`; _isStarting=false; return; }
-                await fetchUser();
-                _reset();
-                btn.style.display = 'none';
-                document.getElementById('ccResultOverlay').style.display = 'none';
-                _state = 'countdown';
-                _lastSpawn = performance.now();
-                _animFrame = requestAnimationFrame(_gameLoop);
-                _showCountdown(() => {
-                    _state = 'playing';
-                    _startTimer();
-                });
-            } catch(e) { toast('❌ Network Error'); }
-            _isStarting = false;
-            btn.disabled = false;
-            btn.textContent = `🎮 ကစားရန် (${ENTRY_FEE}🪙 ကျသင့်မည်)`;
+        function start() {
+            _active = true;
+            _energy = _maxEnergy;
+            _regenInterval = setInterval(() => {
+                if (_active && _energy < _maxEnergy) {
+                    _energy = Math.min(_maxEnergy, _energy + _regenRate);
+                    _updateUI();
+                }
+            }, 1000);
+            _updateUI();
         }
 
-        function _reset() {
-            _clearObjects();
-            _score = 0;
-            _timeLeft = GAME_DURATION;
-            document.getElementById('ccScore').textContent = '0.0';
-            document.getElementById('ccTimerDisplay').textContent = GAME_DURATION;
-            document.getElementById('ccTimerEl').classList.remove('warning');
-            clearInterval(_timerInterval);
-            if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
+        function stop() {
+            _active = false;
+            clearInterval(_regenInterval);
+            clearInterval(_autoInterval);
+            _autoTap = false;
         }
 
-        async function watchAdContinue() {
-            try {
-                const AdController = await window.Adsgram?.init({ blockId:'5183' });
-                AdController.show().then(() => {
-                    document.getElementById('ccResultOverlay').style.display = 'none';
-                    _state = 'countdown';
-                    _lastSpawn = performance.now();
-                    if (!_animFrame) _animFrame = requestAnimationFrame(_gameLoop);
-                    _showCountdown(() => { _state = 'playing'; _startTimer(); });
-                }).catch(() => toast('❌ Ad မပြနိုင်ပါ'));
-            } catch(e) { toast('❌ Ad Error'); }
-        }
-
-        function quit() {
-            _state = 'gameover';
-            _clearObjects();
-            document.getElementById('ccResultOverlay').style.display = 'none';
-            document.getElementById('ccStartBtn').style.display = 'block';
-            document.getElementById('ccStartBtn').textContent = `🎮 ကစားရန် (${ENTRY_FEE}🪙 ကျသင့်မည်)`;
-        }
-
-        function _init() {
-            _reset();
-            _state = 'idle';
-            document.getElementById('ccResultOverlay').style.display = 'none';
-            document.getElementById('ccCountdownOverlay').style.display = 'none';
-            document.getElementById('ccStartBtn').style.display = 'block';
-            document.getElementById('ccStartBtn').textContent = `🎮 ကစားရန် (${ENTRY_FEE}🪙 ကျသင့်မည်)`;
-            document.getElementById('ccScore').textContent = '0.0';
-            document.getElementById('ccTimerDisplay').textContent = GAME_DURATION;
-        }
-
-        function _cleanup() {
-            _state = 'gameover';
-            _clearObjects();
-            clearInterval(_timerInterval);
-            if (_animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
-        }
-
-        return { start, watchAdContinue, quit, _init, _cleanup };
+        return { tap, upgrade, cashOut, start, stop };
     })();
 
-    return { openLuckyWheel, closeLuckyWheel, openCoinClicker, closeCoinClicker, lw, cc };
+    function openLuckyWheel() {
+        document.getElementById('clickerWrap').style.display = 'none';
+        document.getElementById('lwWrap').style.display = '';
+        lw._refresh();
+    }
+    function closeLuckyWheel() { document.getElementById('lwWrap').style.display = 'none'; }
+    function openCoinClicker() {
+        document.getElementById('lwWrap').style.display = 'none';
+        document.getElementById('clickerWrap').style.display = '';
+        clicker.start();
+    }
+    function closeClicker() {
+        clicker.stop();
+        document.getElementById('clickerWrap').style.display = 'none';
+    }
+
+    return { openLuckyWheel, closeLuckyWheel, openCoinClicker, closeClicker, lw, clicker };
 })();
 
 // ─── Withdrawal ───────────────────────────────────────────────
 let _selectedMethod = '';
 function openWithdrawModal() {
-    const minW = Number(_cfg.MIN_WITHDRAWAL) || 100000;
-    const isMmk = _cfg.CURRENCY_MODE === 'mmk';
-    const unit = isMmk ? 'ကျပ်' : 'coins';
-    const hint = document.getElementById('minWithdrawHint');
-    if (hint) hint.textContent = `အနည်းဆုံး ${minW.toLocaleString()} ${unit} ထုတ်ရမည်`;
-    document.getElementById('amountInput').placeholder = `ထုတ်မည့် ပမာဏ (min: ${minW.toLocaleString()})`;
     document.getElementById('withdrawModal').classList.add('active');
 }
 async function submitWithdrawal() {
@@ -1437,15 +1257,10 @@ async function submitWithdrawal() {
     const amount = document.getElementById('amountInput').value.trim();
     const name   = document.getElementById('accountNameInput').value.trim();
     if (!phone||!amount||!name) return toast('📝 အချက်အလက်ပြည့်ပြည့်ဖြည့်ပါ');
-    const amtNum = parseFloat(amount);
-    const minW = Number(_cfg.MIN_WITHDRAWAL) || 100000;
-    if (isNaN(amtNum) || amtNum <= 0) return toast('❌ ပမာဏ မှားနေသည်');
-    if (amtNum < minW) return toast(`❌ အနည်းဆုံး ${minW.toLocaleString()} ထုတ်ရမည်`);
-    if (_user && amtNum > (_user.coins||0)) return toast('❌ Balance မလောက်ပါ');
     try {
-        const r = await fetch(`${API}/withdraw`, { method:'POST', headers, body: JSON.stringify({ method:_selectedMethod, phone, accountDetails:phone, amount:amtNum, accountName:name }) });
+        const r = await fetch(`${API}/withdraw`, { method:'POST', headers, body: JSON.stringify({ method:_selectedMethod, phone, amount:parseFloat(amount), accountName:name }) });
         const d = await r.json();
-        if (d.success) { toast('✅ ထုတ်ရန်တောင်းဆိုမှု ပို့ပြီ'); document.getElementById('withdrawModal').classList.remove('active'); await fetchUser(); }
+        if (d.success) { toast('✅ ထုတ်ရန်တောင်းဆိုမှု ပို့ပြီ'); document.getElementById('withdrawModal').classList.remove('active'); }
         else toast('❌ '+(d.error||'Error'));
     } catch(e) { toast('❌ Error'); }
 }
