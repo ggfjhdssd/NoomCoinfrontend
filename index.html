@@ -802,7 +802,7 @@ const home = (() => {
     // Daily check-in ad
     async function _triggerDaily() {
         try {
-            const AdController = await window.Adsgram?.init({ blockId: 'task-34481' });
+            const AdController = await window.Adsgram?.init({ blockId: '34487' });
             AdController.show().then(async () => {
                 const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers, body: JSON.stringify({ type:'daily' }) });
                 const d = await r.json();
@@ -814,7 +814,7 @@ const home = (() => {
     // Home task ad
     async function _triggerTask(taskId) {
         try {
-            const AdController = await window.Adsgram?.init({ blockId: 'task-34481' });
+            const AdController = await window.Adsgram?.init({ blockId: '34487' });
             AdController.show().then(async () => {
                 const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers, body: JSON.stringify({ type:'home_task', taskId }) });
                 const d = await r.json();
@@ -913,7 +913,7 @@ const earn = (() => {
         _activeTask = taskId;
         _render();
         try {
-            const AdController = await window.Adsgram?.init({ blockId: 'task-34482' });
+            const AdController = await window.Adsgram?.init({ blockId: '34488' });
             AdController.show().then(async () => {
                 const r = await fetch(`${API}/earn/video`, { method:'POST', headers, body: JSON.stringify({ taskId }) });
                 const d = await r.json();
@@ -1091,7 +1091,7 @@ const games = (() => {
 
         async function watchAd() {
             try {
-                const AdController = await window.Adsgram?.init({ blockId:'task-34483' });
+                const AdController = await window.Adsgram?.init({ blockId:'34489' });
                 AdController.show().then(async () => {
                     const r = await fetch(`${API}/games/watch-ad`, { method:'POST', headers });
                     const d = await r.json();
