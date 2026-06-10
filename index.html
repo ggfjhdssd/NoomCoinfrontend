@@ -481,6 +481,9 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
     <div class="modal-content">
         <button class="close-modal-btn" id="closeModal">✕ ပိတ်ရန်</button>
         <div class="modal-title">💳 ပိုက်ဆံထုတ်ရန်</div>
+        <div id="withdrawMinInfo" style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#ffd700;">
+            ⚠️ အနည်းဆုံး ထုတ်ရမည့် ပမာဏ: <b id="minWithdrawDisplay">100,000🪙</b>
+        </div>
         <div class="method-grid">
             <div class="method-btn" data-method="kpay">
                 <img src="https://raw.githubusercontent.com/ggfjhdssd/noomcoin-telegram-app/main/public/images/images.jpeg" alt="KPay">
@@ -691,11 +694,18 @@ async function fetchConfig() {
         const profSym = document.getElementById('profileCoinSymbol');
         if (profSym) profSym.textContent = isMmk ? 'ကျပ်' : '🪙';
         const reward = _cfg.REFERRAL_REWARD || 5000;
+        const isMmkReward = isMmk; // currency mode
         const invTxt = document.getElementById('inviteRewardText');
-        if (invTxt) invTxt.textContent = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
-        // Update invite button labels
+        if (invTxt) invTxt.textContent = isMmkReward ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
         document.querySelectorAll('.ref-reward-lbl').forEach(el => {
-            el.textContent = isMmk ? `${reward}ကျပ်` : `${reward}🪙`;
+            el.textContent = isMmkReward ? `${reward}ကျပ်` : `${reward}🪙`;
+        });
+        // Also update earn invite button
+        const earnInvBtns = document.querySelectorAll('.earn-invite-btn');
+        earnInvBtns.forEach(btn => {
+            const sp = btn.querySelector('.ref-reward-lbl');
+            if (!sp) return;
+            sp.textContent = isMmkReward ? `${reward}ကျပ်` : `${reward}🪙`;
         });
 
         // ── VPN mode (used in vpn.init) ──
@@ -868,28 +878,43 @@ const home = (() => {
         } catch(e) { toast('❌ Error'); }
     }
 
+    // Helper: try show ad, resolve regardless of result
+    async function _tryShowAd(blockId) {
+        try {
+            const ctrl = window.Adsgram?.init({ blockId });
+            if (!ctrl) return; // Adsgram not loaded
+            const ac = await ctrl;
+            await ac.show();
+        } catch(e) {
+            // "no fill", "no ads", user skip – all ignored, reward still given
+            console.warn('Ad result:', e?.message || e);
+        }
+    }
+
     // Daily check-in ad
     async function _triggerDaily() {
+        const btn = document.getElementById('dailyBtn');
+        if (btn) btn.disabled = true;
         try {
-            const AdController = await window.Adsgram?.init({ blockId: '34487' });
-            AdController.show().then(async () => {
-                const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ type:'daily' }) });
-                const d = await r.json();
-                if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
-            }).catch(()=>toast('❌ Ad မပြနိုင်ပါ'));
-        } catch(e) { toast('❌ Ad Error'); }
+            await _tryShowAd('34487');
+            const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ type:'daily' }) });
+            const d = await r.json();
+            if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
+            else toast('❌ ' + (d.error || 'Error'));
+        } catch(e) { toast('❌ Error'); }
     }
 
     // Home task ad
     async function _triggerTask(taskId) {
+        const btn = document.getElementById(taskId + 'Btn');
+        if (btn) btn.disabled = true;
         try {
-            const AdController = await window.Adsgram?.init({ blockId: '34487' });
-            AdController.show().then(async () => {
-                const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ type:'home_task', taskId }) });
-                const d = await r.json();
-                if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
-            }).catch(()=>toast('❌ Ad မပြနိုင်ပါ'));
-        } catch(e) { toast('❌ Ad Error'); }
+            await _tryShowAd('34487');
+            const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ type:'home_task', taskId }) });
+            const d = await r.json();
+            if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
+            else toast('❌ ' + (d.error || 'Error'));
+        } catch(e) { toast('❌ Error'); }
     }
 
     function _bindEvents() {
@@ -982,14 +1007,26 @@ const earn = (() => {
         _activeTask = taskId;
         _render();
         try {
-            const AdController = await window.Adsgram?.init({ blockId: '34488' });
-            AdController.show().then(async () => {
-                const r = await fetch(`${API}/earn/video`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ taskId }) });
-                const d = await r.json();
-                if (d.success) { toast(`✅ +${d.reward}🪙`); await fetchUser(); }
-                _activeTask = null; _fetchStatus();
-            }).catch(()=>{ toast('❌ Ad မပြနိုင်ပါ'); _activeTask=null; _render(); });
-        } catch(e) { _activeTask=null; _render(); }
+            await _tryShowAd('34488');
+            const r = await fetch(`${API}/earn/video`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ taskId }) });
+            const d = await r.json();
+            if (d.success) { toast(`✅ +${d.reward}🪙`); await fetchUser(); }
+            else toast('❌ ' + (d.error || 'Error'));
+            _activeTask = null; _fetchStatus();
+        } catch(e) {
+            toast('❌ Error');
+            _activeTask = null; _render();
+        }
+    }
+
+    // _tryShowAd is defined in home module but accessible in same scope
+    async function _tryShowAd(blockId) {
+        try {
+            const ctrl = window.Adsgram?.init({ blockId });
+            if (!ctrl) return;
+            const ac = await ctrl;
+            await ac.show();
+        } catch(e) { console.warn('Ad result:', e?.message || e); }
     }
 
     function stopAutoWatch() {
@@ -1160,14 +1197,21 @@ const games = (() => {
 
         async function watchAd() {
             try {
-                const AdController = await window.Adsgram?.init({ blockId:'34489' });
-                AdController.show().then(async () => {
-                    const r = await fetch(`${API}/games/watch-ad`, { method:'POST', headers: getHeaders() });
-                    const d = await r.json();
-                    toast(d.success ? '✅ Ad ကြည့်ပြီ!' : '❌ '+(d.error||'Error'));
-                    _refresh();
-                }).catch(() => toast('❌ Ad မပြနိုင်ပါ'));
+                await _tryShowAd('34489');
+                const r = await fetch(`${API}/games/watch-ad`, { method:'POST', headers: getHeaders() });
+                const d = await r.json();
+                toast(d.success ? '✅ Ad ကြည့်ပြီ!' : '❌ '+(d.error||'Error'));
+                _refresh();
             } catch(e) { toast('❌ Ad Error'); }
+        }
+
+        async function _tryShowAd(blockId) {
+            try {
+                const ctrl = window.Adsgram?.init({ blockId });
+                if (!ctrl) return;
+                const ac = await ctrl;
+                await ac.show();
+            } catch(e) { console.warn('Spin ad result:', e?.message || e); }
         }
 
         async function claimAdTicket() {
@@ -1347,14 +1391,11 @@ const games = (() => {
 
         async function cashOut() {
             if (_sessionCoins <= 0) { toast('🪙 먼저 탭해서 코인을 모으세요'); return; }
-            // Show ad before cashout
+            // Show ad before cashout (reward given regardless of ad result)
             try {
-                const AdController = await window.Adsgram?.init({ blockId: '34489' });
-                await AdController.show();
-            } catch(e) {
-                // Ad failed - still allow cashout but warn
-                console.warn('Ad failed:', e);
-            }
+                const ctrl = window.Adsgram?.init({ blockId: '34489' });
+                if (ctrl) { const ac = await ctrl; await ac.show().catch(()=>{}); }
+            } catch(e) { console.warn('Cashout ad:', e?.message); }
             try {
                 const coins = Math.floor(_sessionCoins);
                 if (coins <= 0) { toast('❌ Session coins မလုံပါ'); return; }
@@ -1436,19 +1477,35 @@ const games = (() => {
 // ─── Withdrawal ───────────────────────────────────────────────
 let _selectedMethod = '';
 function openWithdrawModal() {
+    // Update min withdrawal display
+    const minW = parseInt((_cfg && _cfg.MIN_WITHDRAWAL) || 100000);
+    const isMmk = _cfg && _cfg.CURRENCY_MODE === 'mmk';
+    const sym = isMmk ? 'ကျပ်' : '🪙';
+    const minEl = document.getElementById('minWithdrawDisplay');
+    if (minEl) minEl.textContent = `${minW.toLocaleString()}${sym}`;
+    // Show current balance
+    const amtInput = document.getElementById('amountInput');
+    if (amtInput) amtInput.placeholder = `ထုတ်မည့် ပမာဏ (${sym}) | လက်ကျန်: ${(_user?.coins||0).toLocaleString()}`;
     document.getElementById('withdrawModal').classList.add('active');
 }
 async function submitWithdrawal() {
     if (!_selectedMethod) return toast('💳 Payment method ရွေးပါ');
     const phone  = document.getElementById('phoneInput').value.trim();
-    const amount = document.getElementById('amountInput').value.trim();
+    const amount = parseFloat(document.getElementById('amountInput').value.trim());
     const name   = document.getElementById('accountNameInput').value.trim();
     if (!phone||!amount||!name) return toast('📝 အချက်အလက်ပြည့်ပြည့်ဖြည့်ပါ');
+    const minW = parseInt((_cfg && _cfg.MIN_WITHDRAWAL) || 100000);
+    if (amount < minW) return toast(`❌ အနည်းဆုံး ${minW.toLocaleString()} ထုတ်ရပါမည်`);
+    if (_user && amount > _user.coins) return toast(`❌ Coins မလုံပါ (ရှိသည်: ${_user.coins.toLocaleString()})`);
     try {
-        const r = await fetch(`${API}/withdraw`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ method:_selectedMethod, phone, amount:parseFloat(amount), accountName:name }) });
+        const r = await fetch(`${API}/withdraw`, { method:'POST', headers: getHeaders(),
+            body: JSON.stringify({ method:_selectedMethod, phone, amount, accountName:name }) });
         const d = await r.json();
-        if (d.success) { toast('✅ ထုတ်ရန်တောင်းဆိုမှု ပို့ပြီ'); document.getElementById('withdrawModal').classList.remove('active'); }
-        else toast('❌ '+(d.error||'Error'));
+        if (d.success) {
+            toast('✅ ထုတ်ရန်တောင်းဆိုမှု ပို့ပြီ');
+            document.getElementById('withdrawModal').classList.remove('active');
+            await fetchUser(); // refresh balance
+        } else toast('❌ '+(d.error||'Error'));
     } catch(e) { toast('❌ Error'); }
 }
 
