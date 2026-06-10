@@ -246,7 +246,7 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
 </div>
 
 <!-- Main App -->
-<div class="container" id="appContainer" style="display:none;">
+<div class="container" id="appContainer">
     <!-- Header -->
     <div class="premium-header">
         <div class="brand">
@@ -650,7 +650,10 @@ async function _loadReferralList() {
 // ─── UI Config from Admin ─────────────────────────────────────
 async function fetchConfig() {
     try {
-        const r = await fetch(`${API}/ui-config`);
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 8000); // 8s timeout
+        const r = await fetch(`${API}/ui-config`, { signal: ctrl.signal });
+        clearTimeout(timer);
         if (!r.ok) return;
         _cfg = await r.json();
 
@@ -722,34 +725,50 @@ async function fetchConfig() {
 // ─── VPN Gate ─────────────────────────────────────────────────
 const vpn = {
     async init() {
-        // Handle both boolean false and string 'false'
-        if (_cfg.VPN_MODE === false || _cfg.VPN_MODE === 'false') { this._allow(); return; }
+        // If VPN_MODE not set or false → skip check entirely
+        if (!_cfg.VPN_MODE || _cfg.VPN_MODE === false || _cfg.VPN_MODE === 'false') {
+            return; // app already visible
+        }
+        // Show VPN overlay
         document.getElementById('vpnPage').classList.add('active');
         await this.check();
     },
     async check() {
         const btn = document.getElementById('vpnCheckBtn');
         const loc = document.getElementById('vpnLocationText');
-        btn.disabled = true;
-        loc.textContent = 'စစ်ဆေးနေသည်...';
+        if (btn) btn.disabled = true;
+        if (loc) loc.textContent = 'စစ်ဆေးနေသည်...';
         try {
             const r = await fetch(`${API}/check-vpn`, { headers });
+            if (!r.ok) {
+                // Backend error → let user through (don't block on server error)
+                this._allow(); return;
+            }
             const d = await r.json();
             if (d.allowed) {
-                loc.textContent = d.isAdmin ? 'Admin Access 👑' : (d.countryCode==='US'?'United States ✅':'Singapore ✅');
-                document.getElementById('vpnIcon').textContent = '✅';
-                setTimeout(() => this._allow(), 1200);
+                const locLabel = d.isAdmin ? 'Admin 👑' :
+                    d.isBypassed ? 'Bypassed ✅' :
+                    (d.country || 'Allowed') + ' ✅';
+                if (loc) loc.textContent = locLabel;
+                const icon = document.getElementById('vpnIcon');
+                if (icon) icon.textContent = '✅';
+                setTimeout(() => this._allow(), 900);
             } else {
-                loc.textContent = (d.country||'Unknown') + ' ❌';
-                document.getElementById('vpnIcon').textContent = '❌';
-                btn.disabled = false;
-                btn.textContent = '🔄 ထပ်စစ်ဆေးပါ';
+                const country = d.country || 'Unknown';
+                if (loc) loc.textContent = `${country} ❌ — VPN ခံ၍ ဝင်ပါ`;
+                const icon = document.getElementById('vpnIcon');
+                if (icon) icon.textContent = '❌';
+                if (btn) { btn.disabled = false; btn.textContent = '🔄 ထပ်စစ်ဆေးပါ'; }
             }
-        } catch(e) { btn.disabled=false; loc.textContent='Error — ထပ်ကြိုးစားပါ'; }
+        } catch(e) {
+            console.error('VPN check error:', e);
+            // Network error → let user through
+            this._allow();
+        }
     },
     _allow() {
         document.getElementById('vpnPage').classList.remove('active');
-        document.getElementById('appContainer').style.display = '';
+        // appContainer is always visible - vpnPage overlays on top
     }
 };
 
@@ -1434,17 +1453,17 @@ function shareInvite() {
 
 // ─── Init ─────────────────────────────────────────────────────
 async function _init() {
-    // 1. Fetch config first (VPN mode, currency etc.)
-    await fetchConfig();
+    // 1. Fetch config (with timeout - if fails, use defaults)
+    try { await fetchConfig(); } catch(e) { console.error('Config load failed:', e); }
 
-    // 2. VPN gate check
-    await vpn.init();
+    // 2. VPN gate check (only if VPN_MODE is explicitly true)
+    try { await vpn.init(); } catch(e) { console.error('VPN init failed:', e); }
 
     // 3. Fetch user
-    await fetchUser();
+    try { await fetchUser(); } catch(e) { console.error('fetchUser failed:', e); }
 
     // 4. Home module init
-    await home.init();
+    try { await home.init(); } catch(e) { console.error('home.init failed:', e); }
 
     // 5. Withdrawal modal method buttons
     document.querySelectorAll('.method-btn').forEach(btn => {
