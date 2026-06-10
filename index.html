@@ -535,19 +535,13 @@ const API = '/api';
 const tg  = window.Telegram?.WebApp;
 if (tg) { tg.expand(); tg.ready(); }
 
-// initData captured dynamically at request time (Telegram may not be ready at load)
+// initData captured dynamically at request time
 function getInitData() {
     return window.Telegram?.WebApp?.initData || '';
 }
 function getHeaders() {
     return { 'Content-Type':'application/json', 'X-Telegram-Init-Data': getInitData() };
 }
-// Keep 'headers' alias for backward compat (dynamic getter)
-const headers = new Proxy({}, {
-    get(_, k) { return getHeaders()[k]; },
-    ownKeys() { return Object.keys(getHeaders()); },
-    getOwnPropertyDescriptor(_, k) { return { value: getHeaders()[k], enumerable: true, configurable: true }; }
-});
 
 let _user = null;
 let _cfg  = {};
@@ -1463,9 +1457,8 @@ function shareInvite() {
     if (!_user) return;
     const url = `https://t.me/NoomCoinads_bot?start=${_user.userId||_user.id}`;
     // Use admin-configured REF_MESSAGE, replace {link} placeholder if present
-    let refMsg = (_cfg && _cfg.REF_MESSAGE) ||
-        'ဖုန်းလေးပွတ်ရင်း အပိုဝင်ငွေ ရှာချင်သူများအတွက် NoomCoin ရောက်ရှိနေပါပြီ🐻
-ကျွန်တော့်ရဲ့ Link ကနေ ဝင်ဆော့ရုံနဲ့ သင် 5000ကျပ် ချက်ခြင်းရပြီး ပိုက်ဆံ တွေ စုပြီး ငွေထုတ်လို့ရပြီနော်! အခုပဲ စမ်းကြည့်လိုက်ပါ 👇';
+        let refMsg = (_cfg && _cfg.REF_MESSAGE) ||
+        'ဖုန်းလေးပွတ်ရင်း အပိုဝင်ငွေ ရှာချင်သူများအတွက် NoomCoin ရောက်ရှိနေပါပြီ🐻 ကျွန်တော့်ရဲ့ Link ကနေ ဝင်ဆော့ရုံနဲ့ သင် 5000ကျပ် ချက်ခြင်းရပြီး ပိုက်ဆံ တွေ စုပြီး ငွေထုတ်လို့ရပြီနော်! အခုပဲ စမ်းကြည့်လိုက်ပါ 👇';
     // If {link} placeholder used, replace; otherwise append URL
     const txt = refMsg.includes('{link}') ? refMsg.replace('{link}', url) : refMsg;
     tg?.openTelegramLink?.(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(txt)}`);
