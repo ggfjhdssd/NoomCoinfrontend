@@ -531,11 +531,23 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
 const NC = (() => {
 'use strict';
 
-const API  = '/api';
-const tg   = window.Telegram?.WebApp;
+const API = '/api';
+const tg  = window.Telegram?.WebApp;
 if (tg) { tg.expand(); tg.ready(); }
-const initData = tg?.initData || '';
-const headers  = { 'Content-Type':'application/json', 'X-Telegram-Init-Data': initData };
+
+// initData captured dynamically at request time (Telegram may not be ready at load)
+function getInitData() {
+    return window.Telegram?.WebApp?.initData || '';
+}
+function getHeaders() {
+    return { 'Content-Type':'application/json', 'X-Telegram-Init-Data': getInitData() };
+}
+// Keep 'headers' alias for backward compat (dynamic getter)
+const headers = new Proxy({}, {
+    get(_, k) { return getHeaders()[k]; },
+    ownKeys() { return Object.keys(getHeaders()); },
+    getOwnPropertyDescriptor(_, k) { return { value: getHeaders()[k], enumerable: true, configurable: true }; }
+});
 
 let _user = null;
 let _cfg  = {};
@@ -588,11 +600,19 @@ function setAvatar(elId, url) {
 // ─── Fetch User ──────────────────────────────────────────────
 async function fetchUser() {
     try {
-        const r = await fetch(`${API}/user`, { headers });
-        if (!r.ok) return;
+        const h = getHeaders();
+        if (!h['X-Telegram-Init-Data']) {
+            // initData not ready yet — wait and retry
+            await new Promise(r => setTimeout(r, 500));
+        }
+        const r = await fetch(`${API}/user`, { headers: getHeaders() });
+        if (!r.ok) {
+            console.warn('fetchUser failed:', r.status);
+            return;
+        }
         _user = await r.json();
         _renderHeader();
-    } catch(e) {}
+    } catch(e) { console.error('fetchUser error:', e); }
 }
 
 function _renderHeader() {
@@ -627,7 +647,7 @@ async function _loadReferralList() {
     const el = document.getElementById('referralList');
     if (!el) return;
     try {
-        const r = await fetch(`${API}/user/referrals`, { headers });
+        const r = await fetch(`${API}/user/referrals`, { headers: getHeaders() });
         const d = await r.json();
         if (!d.success || !d.list.length) {
             el.innerHTML = '<div style="color:#5e5e71;text-align:center;padding:8px;">သူငယ်ချင်း မဖိတ်ရသေးပါ</div>';
@@ -739,7 +759,7 @@ const vpn = {
         if (btn) btn.disabled = true;
         if (loc) loc.textContent = 'စစ်ဆေးနေသည်...';
         try {
-            const r = await fetch(`${API}/check-vpn`, { headers });
+            const r = await fetch(`${API}/check-vpn`, { headers: getHeaders() });
             if (!r.ok) {
                 // Backend error → let user through (don't block on server error)
                 this._allow(); return;
@@ -789,7 +809,7 @@ const home = (() => {
     async function _loadState() {
         if (!_user) return;
         try {
-            const r = await fetch(`${API}/user/task-status`, { headers });
+            const r = await fetch(`${API}/user/task-status`, { headers: getHeaders() });
             const d = await r.json();
             if (d.success) {
                 _homeTaskCooldowns = {};
@@ -828,7 +848,7 @@ const home = (() => {
             return;
         }
         try {
-            const r = await fetch(`${API}/vip/toggle`, { method:'POST', headers, body: JSON.stringify({ enable: wantOn }) });
+            const r = await fetch(`${API}/vip/toggle`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ enable: wantOn }) });
             const d = await r.json();
             if (d.success) { await fetchUser(); toast(wantOn ? '👑 VIP Mode ဖွင့်ပြီ' : 'VIP Mode ပိတ်ပြီ'); }
         } catch(e) { toast('❌ Error'); }
@@ -837,7 +857,7 @@ const home = (() => {
     async function submitVipPurchase() {
         const screenshot = document.getElementById('vipScreenshotInput').value.trim();
         try {
-            const r = await fetch(`${API}/vip/purchase`, { method:'POST', headers, body: JSON.stringify({ screenshot }) });
+            const r = await fetch(`${API}/vip/purchase`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ screenshot }) });
             const d = await r.json();
             if (d.success) { toast('✅ VIP တောင်းဆိုမှု ပို့ပြီ — Admin စစ်ဆေးမည်'); closeVipModal(); }
             else toast('❌ ' + (d.error||'Error'));
@@ -847,7 +867,7 @@ const home = (() => {
 
     async function handleResetTask() {
         try {
-            const r = await fetch(`${API}/user/reset-tasks`, { method:'POST', headers });
+            const r = await fetch(`${API}/user/reset-tasks`, { method:'POST', headers: getHeaders() });
             const d = await r.json();
             if (d.success) { toast('🔄 Tasks reset ပြီ'); await fetchUser(); _loadState(); }
             else toast('❌ ' + (d.error||'Error'));
@@ -859,7 +879,7 @@ const home = (() => {
         try {
             const AdController = await window.Adsgram?.init({ blockId: '34487' });
             AdController.show().then(async () => {
-                const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers, body: JSON.stringify({ type:'daily' }) });
+                const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ type:'daily' }) });
                 const d = await r.json();
                 if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
             }).catch(()=>toast('❌ Ad မပြနိုင်ပါ'));
@@ -871,7 +891,7 @@ const home = (() => {
         try {
             const AdController = await window.Adsgram?.init({ blockId: '34487' });
             AdController.show().then(async () => {
-                const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers, body: JSON.stringify({ type:'home_task', taskId }) });
+                const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ type:'home_task', taskId }) });
                 const d = await r.json();
                 if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
             }).catch(()=>toast('❌ Ad မပြနိုင်ပါ'));
@@ -957,7 +977,7 @@ const earn = (() => {
 
     async function _fetchStatus() {
         try {
-            const r = await fetch(`${API}/earn/tasks/status`, { headers });
+            const r = await fetch(`${API}/earn/tasks/status`, { headers: getHeaders() });
             const d = await r.json();
             if (d.success) { _status = d.tasks||{}; _render(); }
         } catch(e) {}
@@ -970,7 +990,7 @@ const earn = (() => {
         try {
             const AdController = await window.Adsgram?.init({ blockId: '34488' });
             AdController.show().then(async () => {
-                const r = await fetch(`${API}/earn/video`, { method:'POST', headers, body: JSON.stringify({ taskId }) });
+                const r = await fetch(`${API}/earn/video`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ taskId }) });
                 const d = await r.json();
                 if (d.success) { toast(`✅ +${d.reward}🪙`); await fetchUser(); }
                 _activeTask = null; _fetchStatus();
@@ -1050,7 +1070,7 @@ const games = (() => {
         async function _refresh() {
             if (!document.getElementById('lwWrap') || document.getElementById('lwWrap').style.display==='none') return;
             try {
-                const r = await fetch(`${API}/games/wheel-status`, { headers });
+                const r = await fetch(`${API}/games/wheel-status`, { headers: getHeaders() });
                 if (!r.ok) return;
                 const d = await r.json();
                 if (!d.success) return;
@@ -1100,7 +1120,7 @@ const games = (() => {
             const spinBtn = document.getElementById('lwSpinBtn');
             if (spinBtn) spinBtn.disabled = true;
             try {
-                const r = await fetch(`${API}/games/spin`, { method:'POST', headers });
+                const r = await fetch(`${API}/games/spin`, { method:'POST', headers: getHeaders() });
                 const d = await r.json();
                 if (!r.ok || !d.prizeIndex === undefined) {
                     toast('❌ '+(d.error||'Spin failed'));
@@ -1148,7 +1168,7 @@ const games = (() => {
             try {
                 const AdController = await window.Adsgram?.init({ blockId:'34489' });
                 AdController.show().then(async () => {
-                    const r = await fetch(`${API}/games/watch-ad`, { method:'POST', headers });
+                    const r = await fetch(`${API}/games/watch-ad`, { method:'POST', headers: getHeaders() });
                     const d = await r.json();
                     toast(d.success ? '✅ Ad ကြည့်ပြီ!' : '❌ '+(d.error||'Error'));
                     _refresh();
@@ -1158,7 +1178,7 @@ const games = (() => {
 
         async function claimAdTicket() {
             try {
-                const r = await fetch(`${API}/games/claim-ticket`, { method:'POST', headers });
+                const r = await fetch(`${API}/games/claim-ticket`, { method:'POST', headers: getHeaders() });
                 const d = await r.json();
                 toast(d.success ? '🎟️ Ticket ရပြီ!' : '❌ '+(d.error||'Error'));
                 _refresh();
@@ -1167,7 +1187,7 @@ const games = (() => {
 
         async function claimRefTicket() {
             try {
-                const r = await fetch(`${API}/games/claim-referral-ticket`, { method:'POST', headers });
+                const r = await fetch(`${API}/games/claim-referral-ticket`, { method:'POST', headers: getHeaders() });
                 const d = await r.json();
                 toast(d.success ? '🎟️ Referral Ticket ရပြီ!' : '❌ '+(d.error||'Error'));
                 _refresh();
@@ -1325,7 +1345,7 @@ const games = (() => {
             _updateUI();
             // Save to backend
             fetch(`${API}/games/clicker-upgrade`, {
-                method:'POST', headers,
+                method:'POST', headers: getHeaders(),
                 body: JSON.stringify({ cost: 0, upgradeId: i,
                     state: { tapLv:_tapLv, enLv:_enLv, regenLv:_regenLv, autoLv:_autoLv } })
             }).catch(()=>{});
@@ -1345,7 +1365,7 @@ const games = (() => {
                 const coins = Math.floor(_sessionCoins);
                 if (coins <= 0) { toast('❌ Session coins မလုံပါ'); return; }
                 const r = await fetch(`${API}/games/clicker-cashout`, {
-                    method:'POST', headers,
+                    method:'POST', headers: getHeaders(),
                     body: JSON.stringify({ coins })
                 });
                 const d = await r.json();
@@ -1364,7 +1384,7 @@ const games = (() => {
         // Load saved state from backend
         async function loadState() {
             try {
-                const r = await fetch(`${API}/games/clicker-state`, { headers });
+                const r = await fetch(`${API}/games/clicker-state`, { headers: getHeaders() });
                 if (!r.ok) return;
                 const d = await r.json();
                 if (d.success && d.state) {
@@ -1431,7 +1451,7 @@ async function submitWithdrawal() {
     const name   = document.getElementById('accountNameInput').value.trim();
     if (!phone||!amount||!name) return toast('📝 အချက်အလက်ပြည့်ပြည့်ဖြည့်ပါ');
     try {
-        const r = await fetch(`${API}/withdraw`, { method:'POST', headers, body: JSON.stringify({ method:_selectedMethod, phone, amount:parseFloat(amount), accountName:name }) });
+        const r = await fetch(`${API}/withdraw`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ method:_selectedMethod, phone, amount:parseFloat(amount), accountName:name }) });
         const d = await r.json();
         if (d.success) { toast('✅ ထုတ်ရန်တောင်းဆိုမှု ပို့ပြီ'); document.getElementById('withdrawModal').classList.remove('active'); }
         else toast('❌ '+(d.error||'Error'));
@@ -1453,17 +1473,21 @@ function shareInvite() {
 
 // ─── Init ─────────────────────────────────────────────────────
 async function _init() {
+    // Give Telegram WebApp time to initialize
+    await new Promise(r => setTimeout(r, 300));
+    if (tg) { tg.expand(); tg.ready(); }
+
     // 1. Fetch config (with timeout - if fails, use defaults)
     try { await fetchConfig(); } catch(e) { console.error('Config load failed:', e); }
 
-    // 2. VPN gate check (only if VPN_MODE is explicitly true)
-    try { await vpn.init(); } catch(e) { console.error('VPN init failed:', e); }
-
-    // 3. Fetch user
+    // 2. Fetch user FIRST so coins/username show immediately
     try { await fetchUser(); } catch(e) { console.error('fetchUser failed:', e); }
 
-    // 4. Home module init
+    // 3. Home module init
     try { await home.init(); } catch(e) { console.error('home.init failed:', e); }
+
+    // 4. VPN gate check (runs after user data loaded - non-blocking overlay)
+    try { vpn.init().catch(e => console.error('VPN init failed:', e)); } catch(e) {}
 
     // 5. Withdrawal modal method buttons
     document.querySelectorAll('.method-btn').forEach(btn => {
