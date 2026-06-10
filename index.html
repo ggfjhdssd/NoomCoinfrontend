@@ -281,7 +281,7 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
             <div class="invite-box">
                 <div class="small-text">သူငယ်ချင်းများကို</div>
                 <div class="big-number">ဖိတ်<span>ပြီး</span></div>
-                <div class="small-text" id="inviteRewardText">50🪙 ရယူပါ</div>
+                <div class="small-text" id="inviteRewardText">5000ကျပ် ရယူပါ</div>
             </div>
         </div>
 
@@ -338,7 +338,7 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
         </div>
         <div class="earn-section-title">💰 Watch & Earn</div>
         <div class="tasks-grid" id="tasksGrid"></div>
-        <button class="earn-invite-btn" onclick="NC.shareInvite()">👥 သူငယ်ချင်းများကိုဖိတ်ပြီး 50🪙 ရယူလိုက်ပါ</button>
+        <button class="earn-invite-btn" onclick="NC.shareInvite()">👥 သူငယ်ချင်းများကိုဖိတ်ပြီး <span class="ref-reward-lbl">5000ကျပ်</span> ရယူလိုက်ပါ</button>
         <div class="earn-footer">Task တစ်ခုကို 4 ကြိုင်ကြည့်ရသည် • ကြည့်ပြီး 1 မိနစ်ကြာ ဆက်ကြည့်ရသည် • 4/4 ဖြစ်ရင် 10 မိနစ်နောက် ပြန်စသည်</div>
     </div>
 
@@ -444,7 +444,7 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
                 <button class="invite-tab-btn" onclick="NC.shareInvite()">👥 သူငယ်ချင်းများဖိတ်ရန်</button>
             </div>
         </div>
-        <button class="earn-invite-btn" onclick="NC.shareInvite()" style="margin-top:8px;">👥 သူငယ်ချင်းများကိုဖိတ်ပြီး 50🪙 ရယူလိုက်ပါ</button>
+        <button class="earn-invite-btn" onclick="NC.shareInvite()" style="margin-top:8px;">👥 သူငယ်ချင်းများကိုဖိတ်ပြီး <span class="ref-reward-lbl">5000ကျပ်</span> ရယူလိုက်ပါ</button>
     </div>
 
     <!-- ══════ PROFILE PAGE ══════ -->
@@ -459,6 +459,12 @@ transition:transform 4s cubic-bezier(0.15,0,0.15,1);}
             <p style="margin-top:12px;font-size:12px;color:#5e5e71;">Joined: <span id="joinDate">-</span></p>
         </div>
         <button class="withdraw-home" id="profileWithdrawBtn">💳 ပိုက်ဆံထုတ်ရန်</button>
+
+        <!-- Referral list -->
+        <div style="background:rgba(20,22,27,0.8);border:1px solid rgba(255,215,0,0.12);border-radius:16px;padding:14px;margin-top:12px;">
+            <div style="font-size:13px;font-weight:700;color:#ffd700;margin-bottom:10px;">👥 မိမိဖိတ်ထားသူများ</div>
+            <div id="referralList" style="font-size:12px;color:#8e8e9d;">Loading...</div>
+        </div>
     </div>
 
     <!-- Bottom Nav -->
@@ -613,6 +619,32 @@ function _renderProfile() {
         document.getElementById('joinDate').textContent = new Date(_user.createdAt).toLocaleDateString();
     }
     setAvatar('profileAvatar', _user.photoUrl);
+    // Load referral list
+    _loadReferralList();
+}
+
+async function _loadReferralList() {
+    const el = document.getElementById('referralList');
+    if (!el) return;
+    try {
+        const r = await fetch(`${API}/user/referrals`, { headers });
+        const d = await r.json();
+        if (!d.success || !d.list.length) {
+            el.innerHTML = '<div style="color:#5e5e71;text-align:center;padding:8px;">သူငယ်ချင်း မဖိတ်ရသေးပါ</div>';
+            return;
+        }
+        el.innerHTML = d.list.map((u, i) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                <div style="width:20px;color:#5e5e71;font-size:11px;">${i+1}.</div>
+                <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,215,0,0.1);display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;">
+                    ${u.photo ? `<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='👤'">` : '👤'}
+                </div>
+                <div style="flex:1;font-size:12px;color:#e0e0f0;">${u.masked}</div>
+                <div style="font-size:10px;color:#5e5e71;">${new Date(u.joinedAt).toLocaleDateString()}</div>
+            </div>`).join('');
+    } catch(e) {
+        el.innerHTML = '<div style="color:#5e5e71;">ဖတ်မရပါ</div>';
+    }
 }
 
 // ─── UI Config from Admin ─────────────────────────────────────
@@ -641,9 +673,13 @@ async function fetchConfig() {
         if (symRight) symRight.style.display = isMmk ? '' : 'none';
         const profSym = document.getElementById('profileCoinSymbol');
         if (profSym) profSym.textContent = isMmk ? 'ကျပ်' : '🪙';
-        const reward = _cfg.REFERRAL_REWARD || 50;
+        const reward = _cfg.REFERRAL_REWARD || 5000;
         const invTxt = document.getElementById('inviteRewardText');
         if (invTxt) invTxt.textContent = isMmk ? `${reward}ကျပ် ရယူပါ` : `${reward}🪙 ရယူပါ`;
+        // Update invite button labels
+        document.querySelectorAll('.ref-reward-lbl').forEach(el => {
+            el.textContent = isMmk ? `${reward}ကျပ်` : `${reward}🪙`;
+        });
 
         // ── VPN mode (used in vpn.init) ──
         // Already accessed via _cfg.VPN_MODE in vpn.init()
@@ -1124,57 +1160,89 @@ const games = (() => {
 
     // ── Coin Clicker Game ──
     const clicker = (() => {
-        const MAX_UPGRADES = 5;
-        let _sessionCoins = 0;
-        let _energy = 100;
-        let _maxEnergy = 100;
-        let _tapPower = 1;
-        let _regenRate = 1; // per second
-        let _autoTap = false;
-        let _autoInterval = null;
-        let _regenInterval = null;
-        let _upgLevels = [0, 0, 0, 0]; // tapPower, maxEnergy, regenRate, autoTap
-        let _active = false;
+        // ── Upgrade definitions ──
+        // Tap Power: Lv0→0.001, Lv1→0.050, Lv2→0.080, Lv3→0.10, Lv4→0.50, Lv5→+1
+        const TAP_VALUES   = [0.001, 0.050, 0.080, 0.10, 0.50, 1.0];
+        const TAP_COSTS    = [10000, 15000, 20000, 25000, 30000];
+        // Max Energy: Lv0→100, Lv1→200, Lv2→350, Lv3→550, Lv4→800, Lv5→1200
+        const ENERGY_VALS  = [100, 200, 350, 550, 800, 1200];
+        const ENERGY_COSTS = [1000, 2500, 4000, 6000, 9000];
+        // Regen: Lv0→1/s, Lv1→2/s, Lv2→3/s, Lv3→5/s, Lv4→8/s, Lv5→12/s
+        const REGEN_VALS   = [1, 2, 3, 5, 8, 12];
+        const REGEN_COSTS  = [2000, 2500, 3500, 5000, 7500];
+        // Auto Tap costs: needs tap power Lv (0=200, 1=500, 2=1000)
+        const AUTO_COSTS   = [200, 500, 1000];
 
-        const UPGRADES = [
-            { name:'Tap Power',   icon:'⚡',  baseCost:50,  costMul:1.8, maxLv:5 },
-            { name:'Max Energy',  icon:'🔋',  baseCost:80,  costMul:2.0, maxLv:5 },
-            { name:'Energy Regen',icon:'♻️', baseCost:60,  costMul:1.7, maxLv:5 },
-            { name:'Auto Tap',    icon:'🌟',  baseCost:200, costMul:3.0, maxLv:1 },
-        ];
+        // Saved state (persisted via backend)
+        let _tapLv   = 0; // 0–5
+        let _enLv    = 0;
+        let _regenLv = 0;
+        let _autoLv  = 0; // 0=off,1,2,3
+
+        let _sessionCoins = 0;
+        let _energy  = ENERGY_VALS[0];
+        let _active  = false;
+        let _autoInterval  = null;
+        let _regenInterval = null;
 
         const LEVELS = ['Beginner','Apprentice','Journeyman','Expert','Master','Legend'];
 
-        function _upgCost(i) {
-            return Math.floor(UPGRADES[i].baseCost * Math.pow(UPGRADES[i].costMul, _upgLevels[i]));
+        function _tapPower()  { return TAP_VALUES[Math.min(_tapLv, TAP_VALUES.length-1)]; }
+        function _maxEnergy() { return ENERGY_VALS[Math.min(_enLv,  ENERGY_VALS.length-1)]; }
+        function _regenRate() { return REGEN_VALS[Math.min(_regenLv, REGEN_VALS.length-1)]; }
+        function _autoTapInterval() {
+            if (_autoLv === 0) return 0;
+            return _autoLv === 1 ? 800 : _autoLv === 2 ? 500 : 300;
         }
 
         function _updateUI() {
-            document.getElementById('clickerCoinsEarned').textContent = _sessionCoins;
-            document.getElementById('clickerCoinPerTap').textContent  = '+'+_tapPower;
+            const tp = _tapPower();
+            document.getElementById('clickerCoinsEarned').textContent = _sessionCoins.toFixed(3);
+            document.getElementById('clickerCoinPerTap').textContent  = '+' + tp;
             document.getElementById('clickerEnergy').textContent      = Math.floor(_energy);
-            const pct = (_energy / _maxEnergy) * 100;
-            document.getElementById('clickerEnergyBar').style.width   = pct + '%';
+            document.getElementById('clickerEnergyBar').style.width   = (_energy / _maxEnergy() * 100) + '%';
             const lv = Math.min(Math.floor(_sessionCoins / 100), 5);
-            document.getElementById('clickerLevel').textContent        = `Level ${lv+1} — ${LEVELS[lv]}`;
+            document.getElementById('clickerLevel').textContent = `Level ${lv+1} — ${LEVELS[lv]}`;
 
-            UPGRADES.forEach((u, i) => {
-                const cost = _upgCost(i);
-                const maxed = _upgLevels[i] >= u.maxLv;
-                const btn = document.getElementById('upg'+i);
-                if (!btn) return;
-                btn.className = 'upgrade-btn' + (maxed ? ' maxed' : '');
-                document.getElementById('upg'+i+'cost').textContent = maxed ? 'MAX' : cost+'🪙';
-                document.getElementById('upg'+i+'lv').textContent   = maxed
-                    ? (i===3 ? 'ACTIVE' : 'MAX')
-                    : (i===3 ? 'OFF' : `Lv ${_upgLevels[i]+1}`);
-            });
+            // Tap Power upgrade button
+            const tBtn = document.getElementById('upg0');
+            if (tBtn) {
+                const maxed = _tapLv >= TAP_COSTS.length;
+                tBtn.className = 'upgrade-btn' + (maxed ? ' maxed' : '');
+                document.getElementById('upg0cost').textContent = maxed ? 'MAX' : TAP_COSTS[_tapLv]+'🪙';
+                document.getElementById('upg0lv').textContent   = `Lv ${_tapLv+1} → ${TAP_VALUES[Math.min(_tapLv+1,5)]}`;
+            }
+            // Max Energy
+            const eBtn = document.getElementById('upg1');
+            if (eBtn) {
+                const maxed = _enLv >= ENERGY_COSTS.length;
+                eBtn.className = 'upgrade-btn' + (maxed ? ' maxed' : '');
+                document.getElementById('upg1cost').textContent = maxed ? 'MAX' : ENERGY_COSTS[_enLv]+'🪙';
+                document.getElementById('upg1lv').textContent   = `Lv ${_enLv+1} → ${ENERGY_VALS[Math.min(_enLv+1,5)]}`;
+            }
+            // Energy Regen
+            const rBtn = document.getElementById('upg2');
+            if (rBtn) {
+                const maxed = _regenLv >= REGEN_COSTS.length;
+                rBtn.className = 'upgrade-btn' + (maxed ? ' maxed' : '');
+                document.getElementById('upg2cost').textContent = maxed ? 'MAX' : REGEN_COSTS[_regenLv]+'🪙';
+                document.getElementById('upg2lv').textContent   = `Lv ${_regenLv+1} → ${REGEN_VALS[Math.min(_regenLv+1,5)]}/s`;
+            }
+            // Auto Tap
+            const aBtn = document.getElementById('upg3');
+            if (aBtn) {
+                const maxed = _autoLv >= AUTO_COSTS.length;
+                aBtn.className = 'upgrade-btn' + (maxed ? ' maxed' : '');
+                const autoLabels = ['OFF','Slow','Fast','Ultra'];
+                document.getElementById('upg3cost').textContent = maxed ? 'MAX' : AUTO_COSTS[_autoLv]+'🪙';
+                document.getElementById('upg3lv').textContent   = autoLabels[Math.min(_autoLv, 3)];
+            }
         }
 
         function _spawnFloat(x, y, val) {
             const el = document.createElement('div');
             el.className = 'clicker-float';
-            el.textContent = '+' + val + '🪙';
+            el.textContent = '+' + val;
             el.style.cssText = `left:${x}px;top:${y}px;`;
             document.body.appendChild(el);
             setTimeout(() => el.remove(), 900);
@@ -1187,71 +1255,119 @@ const games = (() => {
             void coin.offsetWidth;
             coin.classList.add('bounce');
             _energy = Math.max(0, _energy - 1);
-            _sessionCoins += _tapPower;
+            const tp = _tapPower();
+            _sessionCoins = parseFloat((_sessionCoins + tp).toFixed(3));
             _updateUI();
-            // Float label
-            const rect = coin.getBoundingClientRect();
-            const ex = (e?.clientX || rect.left + rect.width/2) - 20;
-            const ey = (e?.clientY || rect.top) - 60;
-            _spawnFloat(ex, ey, _tapPower);
+            if (e) {
+                const rect = coin.getBoundingClientRect();
+                _spawnFloat(e.clientX - 20, e.clientY - 60, tp);
+            }
             if (_energy <= 0) toast('🔋 Energy ကုန်ပြီ — ခဏစောင့်ပါ');
         }
 
-        function upgrade(i) {
-            if (_upgLevels[i] >= UPGRADES[i].maxLv) return;
-            const cost = _upgCost(i);
-            if (!_user || _user.coins < cost) { toast(`❌ Coins မလုံသေးပါ (${cost}🪙 လိုသည်)`); return; }
-            // Deduct from local _user
-            _user.coins -= cost;
-            _upgLevels[i]++;
-            // Recalculate stats
-            _tapPower   = 1 + _upgLevels[0] * 2;
-            _maxEnergy  = 100 + _upgLevels[1] * 50;
-            _regenRate  = 1 + _upgLevels[2] * 0.5;
-            if (_upgLevels[3] > 0 && !_autoTap) {
-                _autoTap = true;
-                _autoInterval = setInterval(() => { if (_active) tap(null); }, 800);
+        function _restartAutoTap() {
+            clearInterval(_autoInterval);
+            _autoInterval = null;
+            if (_autoLv > 0 && _active) {
+                const ms = _autoTapInterval();
+                _autoInterval = setInterval(() => { if (_active) tap(null); }, ms);
             }
-            // Update header coins display
+        }
+
+        async function upgrade(i) {
+            if (i === 0) { // Tap Power
+                if (_tapLv >= TAP_COSTS.length) return;
+                const cost = TAP_COSTS[_tapLv];
+                if (!_user || _user.coins < cost) { toast(`❌ ${cost}🪙 လိုသည်`); return; }
+                _user.coins -= cost; _tapLv++;
+                toast(`✅ Tap Power Lv${_tapLv}! (+${_tapPower()} per tap)`);
+            } else if (i === 1) { // Max Energy
+                if (_enLv >= ENERGY_COSTS.length) return;
+                const cost = ENERGY_COSTS[_enLv];
+                if (!_user || _user.coins < cost) { toast(`❌ ${cost}🪙 လိုသည်`); return; }
+                _user.coins -= cost; _enLv++;
+                _energy = Math.min(_energy, _maxEnergy());
+                toast(`✅ Max Energy Lv${_enLv}! (${_maxEnergy()} max)`);
+            } else if (i === 2) { // Regen
+                if (_regenLv >= REGEN_COSTS.length) return;
+                const cost = REGEN_COSTS[_regenLv];
+                if (!_user || _user.coins < cost) { toast(`❌ ${cost}🪙 လိုသည်`); return; }
+                _user.coins -= cost; _regenLv++;
+                toast(`✅ Regen Lv${_regenLv}! (${_regenRate()}/s)`);
+            } else if (i === 3) { // Auto Tap
+                if (_autoLv >= AUTO_COSTS.length) return;
+                const cost = AUTO_COSTS[_autoLv];
+                if (!_user || _user.coins < cost) { toast(`❌ ${cost}🪙 လိုသည်`); return; }
+                _user.coins -= cost; _autoLv++;
+                _restartAutoTap();
+                toast(`✅ Auto Tap ${['Slow','Fast','Ultra'][_autoLv-1]}!`);
+            }
             document.getElementById('totalCoins').textContent = (_user.coins||0).toLocaleString();
-            toast(`✅ ${UPGRADES[i].name} upgraded!`);
             _updateUI();
-            // Save upgrade cost to backend
+            // Save to backend
             fetch(`${API}/games/clicker-upgrade`, {
-                method: 'POST', headers,
-                body: JSON.stringify({ cost, upgradeId: i, level: _upgLevels[i] })
+                method:'POST', headers,
+                body: JSON.stringify({ cost: 0, upgradeId: i,
+                    state: { tapLv:_tapLv, enLv:_enLv, regenLv:_regenLv, autoLv:_autoLv } })
             }).catch(()=>{});
         }
 
         async function cashOut() {
-            if (_sessionCoins <= 0) { toast('탭하여 먼저 코인을 모으세요'); return; }
+            if (_sessionCoins <= 0) { toast('🪙 먼저 탭해서 코인을 모으세요'); return; }
+            // Show ad before cashout
             try {
+                const AdController = await window.Adsgram?.init({ blockId: '34489' });
+                await AdController.show();
+            } catch(e) {
+                // Ad failed - still allow cashout but warn
+                console.warn('Ad failed:', e);
+            }
+            try {
+                const coins = Math.floor(_sessionCoins);
+                if (coins <= 0) { toast('❌ Session coins မလုံပါ'); return; }
                 const r = await fetch(`${API}/games/clicker-cashout`, {
                     method:'POST', headers,
-                    body: JSON.stringify({ coins: _sessionCoins })
+                    body: JSON.stringify({ coins })
                 });
                 const d = await r.json();
                 if (d.success) {
-                    toast(`✅ ${_sessionCoins}🪙 ရပြီ!`);
+                    toast(`✅ ${coins}🪙 ရပြီ!`);
                     _sessionCoins = 0;
-                    _energy = _maxEnergy;
+                    _energy = _maxEnergy();
                     await fetchUser();
                     _updateUI();
                 } else {
                     toast('❌ ' + (d.error||'Error'));
                 }
-            } catch(e) { toast('❌ Error'); }
+            } catch(e) { toast('❌ CashOut Error'); }
+        }
+
+        // Load saved state from backend
+        async function loadState() {
+            try {
+                const r = await fetch(`${API}/games/clicker-state`, { headers });
+                if (!r.ok) return;
+                const d = await r.json();
+                if (d.success && d.state) {
+                    _tapLv   = d.state.tapLv   || 0;
+                    _enLv    = d.state.enLv    || 0;
+                    _regenLv = d.state.regenLv || 0;
+                    _autoLv  = d.state.autoLv  || 0;
+                }
+            } catch(e) {}
         }
 
         function start() {
             _active = true;
-            _energy = _maxEnergy;
+            _energy = Math.min(_energy || _maxEnergy(), _maxEnergy());
+            clearInterval(_regenInterval);
             _regenInterval = setInterval(() => {
-                if (_active && _energy < _maxEnergy) {
-                    _energy = Math.min(_maxEnergy, _energy + _regenRate);
+                if (_active && _energy < _maxEnergy()) {
+                    _energy = Math.min(_maxEnergy(), _energy + _regenRate());
                     _updateUI();
                 }
             }, 1000);
+            _restartAutoTap();
             _updateUI();
         }
 
@@ -1259,10 +1375,10 @@ const games = (() => {
             _active = false;
             clearInterval(_regenInterval);
             clearInterval(_autoInterval);
-            _autoTap = false;
+            _autoInterval = null;
         }
 
-        return { tap, upgrade, cashOut, start, stop };
+        return { tap, upgrade, cashOut, start, stop, loadState };
     })();
 
     function openLuckyWheel() {
@@ -1274,7 +1390,7 @@ const games = (() => {
     function openCoinClicker() {
         document.getElementById('lwWrap').style.display = 'none';
         document.getElementById('clickerWrap').style.display = '';
-        clicker.start();
+        clicker.loadState().then(() => clicker.start());
     }
     function closeClicker() {
         clicker.stop();
@@ -1306,8 +1422,13 @@ async function submitWithdrawal() {
 // ─── Invite / Share ───────────────────────────────────────────
 function shareInvite() {
     if (!_user) return;
-    const txt = `ဖုန်းလေးပွတ်ရင်း အပိုဝင်ငွေ ရှာချင်သူများအတွက် NoomCoin 🐻 ကျွန်တော့်ရဲ့ Link ကနေ ဝင်ဆော့ရုံနဲ့ သင် 50🪙 ချက်ခြင်းရပြီး Coins တွေ စုပြီး ငွေထုတ်လို့ရပြီနော်! အခုပဲ စမ်းကြည့်လိုက်ပါ 👇`;
-    const url  = `https://t.me/NoomCoinads_bot?start=${_user.userId||_user.id}`;
+    const url = `https://t.me/NoomCoinads_bot?start=${_user.userId||_user.id}`;
+    // Use admin-configured REF_MESSAGE, replace {link} placeholder if present
+    let refMsg = (_cfg && _cfg.REF_MESSAGE) ||
+        'ဖုန်းလေးပွတ်ရင်း အပိုဝင်ငွေ ရှာချင်သူများအတွက် NoomCoin ရောက်ရှိနေပါပြီ🐻
+ကျွန်တော့်ရဲ့ Link ကနေ ဝင်ဆော့ရုံနဲ့ သင် 5000ကျပ် ချက်ခြင်းရပြီး ပိုက်ဆံ တွေ စုပြီး ငွေထုတ်လို့ရပြီနော်! အခုပဲ စမ်းကြည့်လိုက်ပါ 👇';
+    // If {link} placeholder used, replace; otherwise append URL
+    const txt = refMsg.includes('{link}') ? refMsg.replace('{link}', url) : refMsg;
     tg?.openTelegramLink?.(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(txt)}`);
 }
 
@@ -1340,6 +1461,11 @@ async function _init() {
 
     // 6. Refresh every minute
     setInterval(fetchUser, 60000);
+
+    // 7. Keep-alive ping every 5 min (prevents Render sleep + page sleep)
+    setInterval(() => {
+        fetch(`${API}/health`).catch(()=>{});
+    }, 5 * 60 * 1000);
 }
 
 _init();
