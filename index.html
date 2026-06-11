@@ -845,11 +845,42 @@ const home = (() => {
             const b = document.getElementById(id+'Btn');
             if (!b) return;
             const cd = _homeTaskCooldowns[id] || 0;
-            if (cd > 0) { b.textContent = `⏳ ${_fmtTime(cd)}`; b.disabled = true; }
-            else { b.textContent = btnLabels[id]; b.disabled = false; }
+            if (cd > 0) {
+                // Show live countdown timer
+                const mins = Math.floor(cd / 60000);
+                const secs = Math.floor((cd % 60000) / 1000);
+                const timerStr = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+                b.textContent = `⏳ ${timerStr}`;
+                b.style.background = 'rgba(255,255,255,0.08)';
+                b.style.color = '#ffd700';
+                b.disabled = true;
+            } else {
+                b.textContent = btnLabels[id];
+                b.style.background = '';
+                b.style.color = '';
+                b.disabled = false;
+            }
         });
         const anyDone = Object.values(_homeTaskCooldowns).some(v=>v>0) || _dailyCooldown>0;
         document.getElementById('resetTaskSection').style.display = anyDone ? '' : 'none';
+    }
+
+    // Live countdown - tick every second to update button timers
+    function _startTimerTick() {
+        setInterval(() => {
+            let needUpdate = false;
+            ['task1','task2','task3','task4'].forEach(id => {
+                if (_homeTaskCooldowns[id] > 0) {
+                    _homeTaskCooldowns[id] = Math.max(0, _homeTaskCooldowns[id] - 1000);
+                    needUpdate = true;
+                }
+            });
+            if (_dailyCooldown > 0) {
+                _dailyCooldown = Math.max(0, _dailyCooldown - 1000);
+                needUpdate = true;
+            }
+            if (needUpdate) _updateHomeTaskButtons();
+        }, 1000);
     }
 
     async function handleVipToggle() {
@@ -965,6 +996,7 @@ const home = (() => {
     async function init() {
         _bindEvents();
         await _loadState();
+        _startTimerTick();       // start live countdown
         setInterval(_loadState, 30000);
     }
 
@@ -1007,8 +1039,20 @@ const earn = (() => {
             const isAct = _activeTask === task.id;
             const dis = full || onCd || (!!_activeTask && !isAct);
             const rlbl = rewardLbl.replace(/\d+/, s.reward||45);
-            let statusTxt = full && s.dailyResetIn>0 ? `⏰ ${_fmtTime(s.dailyResetIn)} reset` : full ? '✅ ပြီးပါပြီ' : onCd ? `⏳ ${_fmtTime(s.watchCooldownRemaining)}` : watchTxt;
-            let btnTxt = isAct&&_autoWatching?'🤖 Auto...':isAct?'Watching...':full?'✅ Done':onCd?`⏳ ${_fmtTime(s.watchCooldownRemaining)}`:'Watch';
+            // Countdown display
+            const cdSec = onCd ? Math.ceil(s.watchCooldownRemaining / 1000) : 0;
+            const cdTxt = onCd ? `⏳ ${cdSec}s` : '';
+            let resetTxt = '';
+            if (full && s.dailyResetIn > 0) {
+                const rm = Math.floor(s.dailyResetIn / 60000);
+                const rs = Math.floor((s.dailyResetIn % 60000) / 1000);
+                resetTxt = `${rm}m ${rs}s`;
+            }
+            let statusTxt = full && s.dailyResetIn>0
+                ? `⏰ ${resetTxt} နောက် reset`
+                : full ? '✅ 4/4 ပြည့်ပြီ — 1hr နောက် reset'
+                : onCd ? cdTxt : watchTxt;
+            let btnTxt = isAct&&_autoWatching?'🤖 Auto...':isAct?'Watching...':full?'✅ Done':onCd?cdTxt:'Watch';
             let btnCls = isAct&&_autoWatching?'task-btn auto-mode':isAct?'task-btn watching':'task-btn';
             html += `<div class="earn-task-card${isAct&&_autoWatching?' vip-active':''}">
                 <div class="etask-top">
@@ -1044,18 +1088,36 @@ const earn = (() => {
         _render();
         try {
             await _tryShowAd('34488');
-            const r = await fetch(`${API}/earn/video`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ taskId }) });
+            const r = await fetch(`${API}/earn/video`, {
+                method:'POST', headers: getHeaders(),
+                body: JSON.stringify({ taskId })
+            });
             const d = await r.json();
-            if (d.success) { toast(`✅ +${d.reward}🪙`); await fetchUser(); }
-            else toast('❌ ' + (d.error || 'Error'));
-            _activeTask = null; _fetchStatus();
+            if (d.success) {
+                const sym = (_cfg && _cfg.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
+                toast(`✅ +${d.reward}${sym}`);
+                await fetchUser();
+            } else {
+                // Show specific error messages
+                if (d.remaining) {
+                    toast(`⏳ ${d.remaining}s နောက် ထပ်ကြည့်ပါ`);
+                } else if (d.resetIn) {
+                    const rm = Math.floor(d.resetIn / 60000);
+                    toast(`✅ 4/4 ပြည့်ပြီ — ${rm} မိနစ်နောက် reset`);
+                } else {
+                    toast('⏳ ' + (d.error || 'Cooldown'));
+                }
+            }
+            _activeTask = null;
+            _fetchStatus();
         } catch(e) {
-            toast('❌ Error');
-            _activeTask = null; _render();
+            console.error('watchTask error:', e);
+            toast('❌ ကွန်ရက် error');
+            _activeTask = null;
+            _render();
         }
     }
 
-    // _tryShowAd is defined in home module but accessible in same scope
     async function _tryShowAd(blockId) {
         try {
             const ctrl = window.Adsgram?.init({ blockId });
