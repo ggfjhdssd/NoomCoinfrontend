@@ -614,6 +614,8 @@ async function fetchUser() {
 
 function _renderHeader() {
     if (!_user) return;
+    // Store userId for clicker session key
+    window._ncUserId = _user.userId || _user.id || 'guest';
     // Update coin symbols based on currency mode
     const isMmk = _cfg.CURRENCY_MODE === 'mmk';
     const symL = document.getElementById('coinSymbolLeft');
@@ -737,6 +739,8 @@ async function fetchConfig() {
         b('task3Btn', _cfg.TASK3_BTN_LABEL);
         b('task4Btn', _cfg.TASK4_BTN_LABEL);
 
+        window._uiCfg = _cfg; // make accessible to all modules
+
         console.log('✅ UI config loaded:', JSON.stringify({
             VIP: _cfg.VIP_CARD_VISIBLE,
             VPN: _cfg.VPN_MODE,
@@ -825,19 +829,25 @@ const home = (() => {
     }
 
     function _updateHomeTaskButtons() {
+        const cfg = window._uiCfg || {};
         const btn = document.getElementById('dailyBtn');
         if (btn) {
-            if (_dailyCooldown > 0) btn.textContent = `⏳ ${_fmtTime(_dailyCooldown)}`;
+            if (_dailyCooldown > 0) { btn.textContent = `⏳ ${_fmtTime(_dailyCooldown)}`; btn.disabled = true; }
             else { btn.textContent = 'Check-in'; btn.disabled = false; }
         }
+        const btnLabels = {
+            task1: cfg.TASK1_BTN_LABEL || 'Get +45',
+            task2: cfg.TASK2_BTN_LABEL || 'Get +45',
+            task3: cfg.TASK3_BTN_LABEL || 'Get +45',
+            task4: cfg.TASK4_BTN_LABEL || 'Get +45',
+        };
         ['task1','task2','task3','task4'].forEach(id => {
             const b = document.getElementById(id+'Btn');
             if (!b) return;
             const cd = _homeTaskCooldowns[id] || 0;
-            if (cd > 0) { b.textContent = `⏳ ${_fmtTime(cd)}`; b.disabled=true; }
-            else { b.disabled = false; }
+            if (cd > 0) { b.textContent = `⏳ ${_fmtTime(cd)}`; b.disabled = true; }
+            else { b.textContent = btnLabels[id]; b.disabled = false; }
         });
-        // Reset task section
         const anyDone = Object.values(_homeTaskCooldowns).some(v=>v>0) || _dailyCooldown>0;
         document.getElementById('resetTaskSection').style.display = anyDone ? '' : 'none';
     }
@@ -897,11 +907,22 @@ const home = (() => {
         if (btn) btn.disabled = true;
         try {
             await _tryShowAd('34487');
-            const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ type:'daily' }) });
+            const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(),
+                body: JSON.stringify({ type:'daily' }) });
             const d = await r.json();
-            if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
-            else toast('❌ ' + (d.error || 'Error'));
-        } catch(e) { toast('❌ Error'); }
+            if (d.success) {
+                const sym = (_cfg.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
+                toast(`✅ +${d.reward}${sym} ရပြီ`);
+                await fetchUser();
+                await _loadState();
+            } else {
+                toast('❌ ' + (d.error || 'Error'));
+                if (btn) { btn.disabled = false; btn.textContent = 'Check-in'; }
+            }
+        } catch(e) {
+            toast('❌ Error');
+            if (btn) { btn.disabled = false; btn.textContent = 'Check-in'; }
+        }
     }
 
     // Home task ad
@@ -910,11 +931,24 @@ const home = (() => {
         if (btn) btn.disabled = true;
         try {
             await _tryShowAd('34487');
-            const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(), body: JSON.stringify({ type:'home_task', taskId }) });
+            const r = await fetch(`${API}/adsgram-reward`, { method:'POST', headers: getHeaders(),
+                body: JSON.stringify({ type:'home_task', taskId }) });
             const d = await r.json();
-            if (d.success) { toast(`✅ +${d.reward}🪙 ရပြီ`); await fetchUser(); _loadState(); }
-            else toast('❌ ' + (d.error || 'Error'));
-        } catch(e) { toast('❌ Error'); }
+            if (d.success) {
+                const sym = (_cfg.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
+                toast(`✅ +${d.reward}${sym} ရပြီ`);
+                await fetchUser();
+                await _loadState();
+            } else {
+                toast('❌ ' + (d.error || 'Error'));
+                if (btn) btn.disabled = false; // re-enable on error
+                _updateHomeTaskButtons();
+            }
+        } catch(e) {
+            toast('❌ Error');
+            if (btn) btn.disabled = false;
+            _updateHomeTaskButtons();
+        }
     }
 
     function _bindEvents() {
@@ -1390,24 +1424,32 @@ const games = (() => {
         }
 
         async function cashOut() {
-            if (_sessionCoins <= 0) { toast('🪙 먼저 탭해서 코인을 모으세요'); return; }
-            // Show ad before cashout (reward given regardless of ad result)
+            if (_sessionCoins <= 0) { toast('🪙 ကြော်ငြာကြည့်ပြီး coins ထုတ်ပါ'); return; }
+            // Show ad before cashout
             try {
                 const ctrl = window.Adsgram?.init({ blockId: '34489' });
                 if (ctrl) { const ac = await ctrl; await ac.show().catch(()=>{}); }
             } catch(e) { console.warn('Cashout ad:', e?.message); }
             try {
-                const coins = Math.floor(_sessionCoins);
-                if (coins <= 0) { toast('❌ Session coins မလုံပါ'); return; }
+                // Send as millicoin (×1000) to preserve decimal precision
+                // e.g. 0.080 → millicoins: 80
+                const millicoins = Math.round(_sessionCoins * 1000);
+                if (millicoins <= 0) { toast('❌ Coins မလုံပါ'); return; }
                 const r = await fetch(`${API}/games/clicker-cashout`, {
                     method:'POST', headers: getHeaders(),
-                    body: JSON.stringify({ coins })
+                    body: JSON.stringify({ millicoins })
                 });
                 const d = await r.json();
                 if (d.success) {
-                    toast(`✅ ${coins}🪙 ရပြီ!`);
+                    const sym = (_cfg?.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
+                    toast(`✅ ${_sessionCoins.toFixed(3)}${sym} ရပြီ!`);
                     _sessionCoins = 0;
                     _energy = _maxEnergy();
+                    // Clear saved session from localStorage and backend
+                    _sessionCoins = 0; // reset before save
+                    _saveSession();
+                    _saveSessionBackend();
+                    _sessionCoins = 0; // ensure 0
                     await fetchUser();
                     _updateUI();
                 } else {
@@ -1416,7 +1458,46 @@ const games = (() => {
             } catch(e) { toast('❌ CashOut Error'); }
         }
 
-        // Load saved state from backend
+        // Save session coins to localStorage (survives page close)
+        function _saveSession() {
+            try {
+                const key = 'nc_clicker_' + (window._ncUserId || 'guest');
+                localStorage.setItem(key, JSON.stringify({
+                    sessionCoins: _sessionCoins,
+                    energy: _energy,
+                    ts: Date.now()
+                }));
+            } catch(e) {}
+        }
+
+        function _restoreSession() {
+            try {
+                const key = 'nc_clicker_' + (window._ncUserId || 'guest');
+                const raw = localStorage.getItem(key);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                // Only restore if less than 2 hours old
+                if (Date.now() - data.ts < 2 * 60 * 60 * 1000) {
+                    _sessionCoins = parseFloat(data.sessionCoins) || 0;
+                    _energy       = parseFloat(data.energy) || _maxEnergy();
+                    console.log('🔄 Clicker session restored:', _sessionCoins);
+                }
+            } catch(e) {}
+        }
+
+        // Auto-save to backend every 30s (localStorage saves every 10s)
+        let _autoSaveInterval = null;
+        async function _saveSessionBackend() {
+            if (_sessionCoins <= 0) return;
+            try {
+                fetch(`${API}/games/clicker-session`, {
+                    method:'POST', headers: getHeaders(),
+                    body: JSON.stringify({ sessionCoins: _sessionCoins, energy: _energy })
+                }).catch(()=>{});
+            } catch(e) {}
+        }
+
+        // Load saved upgrade state from backend
         async function loadState() {
             try {
                 const r = await fetch(`${API}/games/clicker-state`, { headers: getHeaders() });
@@ -1427,20 +1508,34 @@ const games = (() => {
                     _enLv    = d.state.enLv    || 0;
                     _regenLv = d.state.regenLv || 0;
                     _autoLv  = d.state.autoLv  || 0;
+                    if (d.state.sessionCoins !== undefined) {
+                        _sessionCoins = parseFloat(d.state.sessionCoins) || 0;
+                    }
                 }
-            } catch(e) {}
+                // Also try localStorage
+                _restoreSession();
+            } catch(e) { _restoreSession(); }
         }
 
         function start() {
             _active = true;
             _energy = Math.min(_energy || _maxEnergy(), _maxEnergy());
             clearInterval(_regenInterval);
+            clearInterval(_autoSaveInterval);
             _regenInterval = setInterval(() => {
                 if (_active && _energy < _maxEnergy()) {
                     _energy = Math.min(_maxEnergy(), _energy + _regenRate());
                     _updateUI();
                 }
             }, 1000);
+            // Auto-save localStorage every 10s, backend every 30s
+            let _saveTick = 0;
+            _autoSaveInterval = setInterval(() => {
+                if (!_active || _sessionCoins <= 0) return;
+                _saveSession(); // localStorage
+                _saveTick++;
+                if (_saveTick % 3 === 0) _saveSessionBackend(); // backend every 30s
+            }, 10000);
             _restartAutoTap();
             _updateUI();
         }
@@ -1449,7 +1544,10 @@ const games = (() => {
             _active = false;
             clearInterval(_regenInterval);
             clearInterval(_autoInterval);
+            clearInterval(_autoSaveInterval);
             _autoInterval = null;
+            // Save session on stop
+            if (_sessionCoins > 0) _saveSession();
         }
 
         return { tap, upgrade, cashOut, start, stop, loadState };
