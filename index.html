@@ -911,16 +911,17 @@ const home = (() => {
                 body: JSON.stringify({ type:'daily' }) });
             const d = await r.json();
             if (d.success) {
-                const sym = (_cfg.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
+                const sym = (_cfg && _cfg.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
                 toast(`✅ +${d.reward}${sym} ရပြီ`);
                 await fetchUser();
                 await _loadState();
             } else {
-                toast('❌ ' + (d.error || 'Error'));
+                toast('⏳ ' + (d.error || 'Cooldown မကုန်ရသေးပါ'));
                 if (btn) { btn.disabled = false; btn.textContent = 'Check-in'; }
             }
         } catch(e) {
-            toast('❌ Error');
+            console.error('daily trigger error:', e);
+            toast('❌ ကွန်ရက် error — ထပ်ကြိုးစားပါ');
             if (btn) { btn.disabled = false; btn.textContent = 'Check-in'; }
         }
     }
@@ -935,18 +936,19 @@ const home = (() => {
                 body: JSON.stringify({ type:'home_task', taskId }) });
             const d = await r.json();
             if (d.success) {
-                const sym = (_cfg.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
+                const sym = (_cfg && _cfg.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
                 toast(`✅ +${d.reward}${sym} ရပြီ`);
                 await fetchUser();
                 await _loadState();
             } else {
-                toast('❌ ' + (d.error || 'Error'));
-                if (btn) btn.disabled = false; // re-enable on error
+                // Show cooldown message - don't show generic "Error"
+                const msg = d.error || 'ထပ်ကြိုးစားပါ';
+                toast('⏳ ' + msg);
                 _updateHomeTaskButtons();
             }
         } catch(e) {
-            toast('❌ Error');
-            if (btn) btn.disabled = false;
+            console.error('task trigger error:', e);
+            toast('❌ ကွန်ရက် error — ထပ်ကြိုးစားပါ');
             _updateHomeTaskButtons();
         }
     }
@@ -1425,37 +1427,43 @@ const games = (() => {
 
         async function cashOut() {
             if (_sessionCoins <= 0) { toast('🪙 ကြော်ငြာကြည့်ပြီး coins ထုတ်ပါ'); return; }
-            // Show ad before cashout
+            // Show ad before cashout (reward given even if ad fails)
             try {
                 const ctrl = window.Adsgram?.init({ blockId: '34489' });
                 if (ctrl) { const ac = await ctrl; await ac.show().catch(()=>{}); }
             } catch(e) { console.warn('Cashout ad:', e?.message); }
             try {
-                // Send as millicoin (×1000) to preserve decimal precision
-                // e.g. 0.080 → millicoins: 80
-                const millicoins = Math.round(_sessionCoins * 1000);
-                if (millicoins <= 0) { toast('❌ Coins မလုံပါ'); return; }
+                // Convert to millicoins (integer) to preserve decimal precision
+                // 0.038 → Math.round(0.038 * 1000) = 38
+                // 0.001 → Math.round(0.001 * 1000) = 1
+                const mc = Math.round(parseFloat(_sessionCoins.toFixed(6)) * 1000);
+                if (!mc || mc <= 0) {
+                    toast('❌ Coins မလုံပါ — ထပ် tap ပါ');
+                    return;
+                }
+                const shown = _sessionCoins.toFixed(3);
                 const r = await fetch(`${API}/games/clicker-cashout`, {
-                    method:'POST', headers: getHeaders(),
-                    body: JSON.stringify({ millicoins })
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ millicoins: mc })
                 });
                 const d = await r.json();
                 if (d.success) {
-                    const sym = (_cfg?.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
-                    toast(`✅ ${_sessionCoins.toFixed(3)}${sym} ရပြီ!`);
+                    const sym = (_cfg && _cfg.CURRENCY_MODE === 'mmk') ? 'ကျပ်' : '🪙';
+                    toast(`✅ ${shown}${sym} ရပြီ!`);
                     _sessionCoins = 0;
                     _energy = _maxEnergy();
-                    // Clear saved session from localStorage and backend
-                    _sessionCoins = 0; // reset before save
                     _saveSession();
                     _saveSessionBackend();
-                    _sessionCoins = 0; // ensure 0
                     await fetchUser();
                     _updateUI();
                 } else {
-                    toast('❌ ' + (d.error||'Error'));
+                    toast('❌ ' + (d.error || 'Error'));
                 }
-            } catch(e) { toast('❌ CashOut Error'); }
+            } catch(e) {
+                console.error('CashOut error:', e);
+                toast('❌ CashOut Error');
+            }
         }
 
         // Save session coins to localStorage (survives page close)
